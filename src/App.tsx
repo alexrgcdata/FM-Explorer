@@ -18,6 +18,7 @@ import {
   History,
   LayoutDashboard,
   Menu,
+  Package,
   Plus,
   RefreshCw,
   Search,
@@ -68,6 +69,11 @@ import {
 } from './components/connect-dialogs'
 
 const RelationshipView = lazy(() => import('./components/relationship-view'))
+const HandoffView = lazy(() =>
+  import('./components/handoff-view').then((module) => ({
+    default: module.HandoffView,
+  })),
+)
 const navigation = [
   { id: 'overview', title: 'Overview', icon: LayoutDashboard },
   { id: 'schema', title: 'Schema explorer', icon: Table2 },
@@ -77,6 +83,7 @@ const navigation = [
   { id: 'query', title: 'Query builder', icon: Terminal },
   { id: 'requests', title: 'Saved requests', icon: ClipboardCheck },
   { id: 'developer', title: 'Developer tools', icon: Code2 },
+  { id: 'handoff', title: 'Handoff package', icon: Package },
   { id: 'ai', title: 'AI tools', icon: Sparkles },
 ] as const
 const descriptions: Record<Page, string> = {
@@ -89,6 +96,7 @@ const descriptions: Record<Page, string> = {
   ai: 'Make your solution understandable to agents.',
   requests: 'Reusable requests. Clear expectations. Repeatable checks.',
   history: 'Dated schemas. Visible changes. Integration impact.',
+  handoff: 'Your schema, knowledge, and read integration. Ready to hand over.',
 }
 export default function App() {
   return (
@@ -600,6 +608,14 @@ function Explorer() {
                 setRequestFilter(request.name)
               }}
             />
+          ) : page === 'handoff' ? (
+            <Suspense
+              fallback={
+                <p className="subtle-note">Loading handoff workspace…</p>
+              }
+            >
+              <HandoffView key={profile.id} />
+            </Suspense>
           ) : !snapshot ? (
             <section className="unconnected panel">
               <div className="unconnected-icon">
@@ -852,7 +868,7 @@ function Explorer() {
                 : snapshot
                   ? 'Saved schema'
                   : 'Ready to connect'}
-              <span className="footer-dot">·</span>v0.3.0
+              <span className="footer-dot">·</span>v0.4.0
             </span>
           </footer>
         </main>

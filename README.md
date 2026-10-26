@@ -49,6 +49,24 @@ The comparison lists saved requests whose conditions, sorting, or field expectat
 
 Missing metadata from partial discovery is marked unknown. A resource no longer exposed is not proof of deletion; account permissions can change visibility. Account identity/privileges are not fingerprinted, and migrated baselines lack saved target-host details. Versions from different known targets, protocols, databases, API versions, or metadata sources are rejected. Renames appear as missing/new names. Counts, sample records, descriptions, raw payloads, and timestamps do not produce structural changes. These are schema inspections, not backups or restore points.
 
+## Integration and AI handoff packages
+
+Open **Handoff package**, choose resources and saved requests, and add developer knowledge. Notes can describe a resource/field, status meanings, workflows, or agent constraints. They persist in IndexedDB v4. New notes are drafts; confirmation is an explicit human assertion. Editing text, category, or scope resets confirmation. Notes survive clearing schema history and are removed with their connection profile.
+
+**Preview files** shows the generated documents. **Download handoff ZIP** creates a local archive containing:
+
+- `manifest.json`: version, source/inspection/export times, resource-to-file mapping, scope/limitations, privacy flags, and SHA-256 file hashes (excluding the manifest itself).
+- `schema.json`, separate `types/*.ts` modules and `schemas/*.json`: selected structural metadata, TypeScript, and JSON Schemas.
+- `CONTEXT.md`, `AGENT-CONTEXT.md`, `knowledge.json`: observed metadata separated from human-confirmed knowledge and unverified drafts. No AI service is called.
+- `requests.json`: selected saved read/check definitions and historical summaries, without original error bodies.
+- `api-examples.json`, `read.mjs`, `README.md`: native bounded read examples, a dependency-free Node 24 runner, and authentication/setup guidance.
+
+Credentials, returned records, and raw response bodies are not copied from the workspace. Saved filter values are redacted by default. Enabling **Include reviewed filter values** starts with empty inputs; enter approved values or explicitly select **Use saved value** per filter. Partially redacted requests have no compiled request spec, and the runner refuses to send them. It never drops their filters to run a broader query. Separate resource examples are unfiltered bounded reads of at most 10 rows.
+
+The runner can list examples without network access. A user-selected read uses `FM_HOST` and `FM_AUTHORIZATION` supplied locally, rejects redirects, and has a 20-second timeout / 8 MiB response cap. It prints native JSON to the user's terminal, preserving numeric literals, and does not follow continuation pages or evaluate the saved check expectations. The package is capped at 5 MiB of source text; reduce scope if exceeded. Hashes detect changed file contents and do not establish trust or authorship. Human-authored notes, query descriptions, schema names, and host/database metadata may be private; review the preview before sharing.
+
+These exports document an integration; they cannot restore a FileMaker database. External FileMaker acceptance remains pending.
+
 ## Connect a real FileMaker endpoint
 
 Use **Add real endpoint** or **Connections → Add connection**. Enter an HTTPS host only, the exact hosted database name, and a protocol. API paths are constructed by the connector.
@@ -61,13 +79,14 @@ Enter credentials locally in the app, never in chat. Authorization remains in lo
 
 ## Local storage and privacy
 
-IndexedDB database: `fm-api-explorer`, version 3.
+IndexedDB database: `fm-api-explorer`, version 4.
 
 | Store | Contents |
 | --- | --- |
 | profiles | Nonsecret name, host, database, protocol, version |
 | snapshots | Inspected schema, raw metadata, source/time, qualified counts, warnings; no record rows |
 | schemaVersions | Up to 50 dated structural inspections per connection; no rows, raw payloads, or record counts |
+| knowledgeNotes | Up to 200 developer-authored notes per connection, marked draft or human-confirmed |
 | preferences | Active connection, favorites, compact rows, reduced motion |
 | activity | Last 200 connection/query events; no query literal values, passwords, or tokens |
 | requests | Saved read queries, filter values, expectations, and definition revisions |
@@ -99,10 +118,8 @@ Generated OpenAPI documents are read-operation snippets, not an entire API contr
 
 ## Possible future additions
 
-Versioned schema comparisons are available now. The next planned milestone is the integration and AI handoff package. See [roadmap.md](roadmap.md) for sequencing and acceptance criteria. Potential additions include:
+Schema history and integration/AI handoff packages are available now. The next milestone is real-solution validation. See [roadmap.md](roadmap.md) for sequencing and acceptance criteria. Potential additions include:
 
-- Portable integration and AI handoff bundles containing schema, TypeScript, API examples, developer notes, and check definitions.
-- Developer-authored business meanings, workflow notes, and agent constraints alongside observed metadata.
 - Verified MCP and OpenBridge adapters, with explicit permissions and reviewed tool definitions.
 - Richer schema import, including possible FileMaker DDR support.
 - Focused React starters, typed API clients, and hooks generated from selected resources.
@@ -128,6 +145,9 @@ Tests exercise both local protocol flows, session ownership, guards, empty finds
 - `src/lib/workspace.tsx`: active profiles/sessions/schema, history, preferences.
 - `src/lib/storage.ts`: IndexedDB stores and migration.
 - `src/lib/schema-history.ts`: structural comparison, provenance, and potential saved-request impact.
+- `src/lib/handoff.ts`: portable package assembly, redaction, hashes, and ZIP creation.
+- `src/lib/handoff-runner.ts`: standalone exported Node read runner.
+- `src/lib/knowledge.ts`: developer-note validation.
 - `src/lib/queries.ts`: protocol-specific request compilation.
 - `src/lib/generators.ts`: integration artifacts from inspected metadata.
 - `src/components/`: workbench views, connection/auth dialogs, shadcn primitives.

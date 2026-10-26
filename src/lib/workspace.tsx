@@ -20,6 +20,7 @@ import {
 import { api, bootstrap, ClientError } from './api'
 import * as storage from './storage'
 import type { SchemaVersion } from './schema-history'
+import type { KnowledgeNote } from './knowledge'
 import {
   evaluateCheck,
   savedRequestSchema,
@@ -43,6 +44,7 @@ function useWorkspaceState() {
   const [savedRequests, setSavedRequests] = useState<SavedRequest[]>([]),
     [checkRuns, setCheckRuns] = useState<CheckRun[]>([])
   const [schemaVersions, setSchemaVersions] = useState<SchemaVersion[]>([])
+  const [knowledgeNotes, setKnowledgeNotes] = useState<KnowledgeNote[]>([])
   const mounted = useRef(true),
     connecting = useRef(false)
   const profile = profiles.find((p) => p.id === activeId) ?? profiles[0],
@@ -97,6 +99,7 @@ function useWorkspaceState() {
         const versions = (
           await Promise.all(list.map((p) => storage.getSchemaVersions(p.id)))
         ).flat()
+        const notes = await storage.getKnowledgeNotes()
         if (cancelled) return
         setProfiles(list)
         setSnapshots(Object.fromEntries(cached.map((s) => [s.profileId, s])))
@@ -106,6 +109,7 @@ function useWorkspaceState() {
         setSavedRequests(requests)
         setCheckRuns(runs)
         setSchemaVersions(versions)
+        setKnowledgeNotes(notes)
         setCompactState(await storage.preference('compact', false))
         setMotionState(await storage.preference('reduced-motion', false))
         await bootstrap()
@@ -282,6 +286,7 @@ function useWorkspaceState() {
     setSavedRequests((current) => current.filter((r) => r.profileId !== id))
     setCheckRuns((current) => current.filter((r) => r.profileId !== id))
     setSchemaVersions((current) => current.filter((v) => v.profileId !== id))
+    setKnowledgeNotes((current) => current.filter((n) => n.profileId !== id))
     if (activeId === id) await selectProfile('lab-data')
   }
   async function loadRecords(
@@ -447,6 +452,23 @@ function useWorkspaceState() {
     setSchemaVersions([])
     toast.success('Saved schema snapshots cleared')
   }
+  async function saveKnowledgeNote(note: KnowledgeNote) {
+    if (note.profileId !== profile.id)
+      throw new Error('This note belongs to a different connection.')
+    const safe = await storage.saveKnowledgeNote(note)
+    setKnowledgeNotes((current) => [
+      safe,
+      ...current.filter((n) => n.id !== safe.id),
+    ])
+    toast.success('Developer note saved locally')
+    return safe
+  }
+  async function deleteKnowledgeNote(id: string) {
+    if (!knowledgeNotes.some((n) => n.id === id && n.profileId === profile.id))
+      return
+    await storage.deleteKnowledgeNote(id)
+    setKnowledgeNotes((current) => current.filter((n) => n.id !== id))
+  }
   return {
     ready,
     startupError,
@@ -482,6 +504,9 @@ function useWorkspaceState() {
     deleteSavedRequest,
     runSavedRequest,
     schemaVersions: schemaVersions.filter((v) => v.profileId === profile.id),
+    knowledgeNotes: knowledgeNotes.filter((n) => n.profileId === profile.id),
+    saveKnowledgeNote,
+    deleteKnowledgeNote,
   }
 }
 type Workspace = ReturnType<typeof useWorkspaceState>

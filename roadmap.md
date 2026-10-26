@@ -18,7 +18,7 @@ Preserve dated schema versions instead of overwriting the previous version. Comp
 
 Acceptance: a controlled lab schema change produces a precise before/after comparison and identifies affected saved checks. The UI never implies automatic repair or database restore.
 
-## Step 3 — Generate an integration and AI handoff package
+## Step 3 — Generate an integration and AI handoff package (implemented locally)
 
 Bundle selected schema, TypeScript, API examples, saved request/check definitions, and Markdown context into a versioned downloadable package. Include a manifest, source/time, limitations, and instructions. Exclude authentication material and record values by default; let users review/redact saved filter values before including them.
 
@@ -48,4 +48,6 @@ Step 1 is implemented. Seventeen automated tests pass, including v1-to-v2 Indexe
 
 Step 2 is now implemented locally. IndexedDB v3 preserves a migrated baseline plus up to 50 versions per connection. Structural comparisons qualify partial/unknown metadata and link changed fields to saved request expectations, filters and sorts. The lab example is an illustrative comparison, not a change to the running synthetic server. Browser verification covered real refreshes producing unchanged comparisons, the illustrative changed comparison, affected-request navigation, JSON export, and responsive widths. Twenty-five automated tests cover the combined application, including migration, history immutability/retention, scope mismatch, partial discovery and change impact. Real FileMaker interoperability remains unverified.
 
-Steps 3–6 remain planned. No new external endpoint, production write, automatic monitoring, AI provider, or deployment was used. Continue using the local lab until Alex supplies an approved real target. The next implementation is Step 3: a portable integration and AI handoff package.
+Step 3 is implemented locally in v0.4.0. All 33 automated tests and the build pass. Packages are ZIP archives with selected schema, TypeScript/JSON Schemas, native API examples, a dependency-free Node read runner, check definitions/history, portable Markdown/JSON knowledge, manifest provenance/limits, and SHA-256 file hashes. IndexedDB v4 preserves earlier stores and adds up to 200 developer notes per connection. Notes distinguish drafts from explicit human confirmation. Saved filter values require per-value review; redacted requests are blocked, never broadened. Browser ZIPs were independently opened with Python and their hashes/redaction verified. The extracted reviewed OData read returned seven Active fixture rows out of twelve matching. Tests also execute a native Data API find with externally supplied ephemeral lab authorization. No real customer data or remote FileMaker server was used.
+
+Steps 4–6 remain planned. No new external endpoint, production write, automatic monitoring, AI provider, or deployment was used. Continue using the local lab until Alex supplies an approved real target. The next milestone is Step 4: approved real-solution trials and documented interoperability/usefulness.

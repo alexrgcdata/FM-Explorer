@@ -16,6 +16,8 @@ function typeName(name: string) {
   const result = name.replace(/[^A-Za-z0-9_$]/g, '_')
   return /^[A-Za-z_$]/.test(result) ? result : `Resource_${result}`
 }
+const commentText = (value: string) =>
+  value.replaceAll('*/', '* /').replace(/[\r\n\u2028\u2029]/g, ' ')
 function tsType(f: Field) {
   const type =
     f.repetitions && f.repetitions > 1
@@ -89,7 +91,7 @@ export function generate(
       limit: 20,
     }).path.split('?')[0]
   if (kind === 'typescript')
-    return `// ${entity.name} — ${protocol}\n// Source: ${source.replaceAll('\n', ' ')}; inspected: ${stamp}\n// Numeric strings preserve decimals and large integers. Unknown nullability is permissive.\n\nexport interface ${typeName(entity.name)} {\n${entity.fields.map((f) => `  /** ${f.description.replaceAll('*/', '* /').replaceAll('\n', ' ')} */\n  ${JSON.stringify(f.name)}${f.required || f.key ? '' : '?'}: ${tsType(f)};`).join('\n\n')}\n}\n`
+    return `// ${commentText(entity.name)} — ${protocol}\n// Source: ${commentText(source)}; inspected: ${commentText(stamp)}\n// Numeric strings preserve decimals and large integers. Unknown nullability is permissive.\n\nexport interface ${typeName(entity.name)} {\n${entity.fields.map((f) => `  /** ${commentText(f.description)} */\n  ${JSON.stringify(f.name)}${f.required || f.key ? '' : '?'}: ${tsType(f)};`).join('\n\n')}\n}\n`
   if (kind === 'jsonschema')
     return JSON.stringify(
       {

@@ -2,6 +2,7 @@ import { openDB, type DBSchema } from 'idb'
 import type { Profile } from './data'
 import type { ActivityEntry, Snapshot } from './contracts'
 import { makeSchemaVersion, type SchemaVersion } from './schema-history'
+import { knowledgeNoteSchema, type KnowledgeNote } from './knowledge'
 import {
   savedRequestSchema,
   type CheckRun,
@@ -11,6 +12,11 @@ import {
 interface ExplorerDB extends DBSchema {
   profiles: { key: string; value: Profile }
   snapshots: { key: string; value: Snapshot }
+  knowledgeNotes: {
+    key: string
+    value: KnowledgeNote
+    indexes: { 'by-profile': string }
+  }
   schemaVersions: {
     key: string
     value: SchemaVersion
@@ -33,8 +39,13 @@ interface ExplorerDB extends DBSchema {
     indexes: { 'by-time': string }
   }
 }
-export const database = openDB<ExplorerDB>('fm-api-explorer', 3, {
+export const database = openDB<ExplorerDB>('fm-api-explorer', 4, {
   upgrade(db, oldVersion, _newVersion, transaction) {
+    if (oldVersion < 4)
+      db.createObjectStore('knowledgeNotes', { keyPath: 'id' }).createIndex(
+        'by-profile',
+        'profileId',
+      )
     if (oldVersion < 1) {
       db.createObjectStore('profiles', { keyPath: 'id' })
       db.createObjectStore('snapshots', { keyPath: 'profileId' })
@@ -130,6 +141,7 @@ export async function removeProfile(id: string) {
       'profiles',
       'snapshots',
       'schemaVersions',
+      'knowledgeNotes',
       'activity',
       'requests',
       'checkRuns',
@@ -138,6 +150,11 @@ export async function removeProfile(id: string) {
   )
   await tx.objectStore('profiles').delete(id)
   await tx.objectStore('snapshots').delete(id)
+  for (const key of await tx
+    .objectStore('knowledgeNotes')
+    .index('by-profile')
+    .getAllKeys(id))
+    await tx.objectStore('knowledgeNotes').delete(key)
   for (const key of await tx
     .objectStore('schemaVersions')
     .index('by-profile')
@@ -159,6 +176,27 @@ export async function saveRequest(value: SavedRequest) {
   const safe = savedRequestSchema.parse(value)
   await (await database).put('requests', safe)
   return safe
+}
+export async function getKnowledgeNotes() {
+  return (await (await database).getAll('knowledgeNotes'))
+    .map((n) => knowledgeNoteSchema.parse(n))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+}
+export async function saveKnowledgeNote(value: KnowledgeNote) {
+  const safe = knowledgeNoteSchema.parse(value),
+    db = await database,
+    tx = db.transaction('knowledgeNotes', 'readwrite')
+  const count = await tx.store.index('by-profile').count(safe.profileId)
+  if (count >= 200 && !(await tx.store.get(safe.id))) {
+    await tx.done
+    throw new Error('Keep up to 200 developer notes per connection.')
+  }
+  await tx.store.put(safe)
+  await tx.done
+  return safe
+}
+export async function deleteKnowledgeNote(id: string) {
+  await (await database).delete('knowledgeNotes', id)
 }
 export async function getRequests() {
   const values = await (await database).getAll('requests')

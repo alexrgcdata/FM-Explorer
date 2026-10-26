@@ -232,7 +232,7 @@ after(async () => {
   ;(await storage.database).close()
 })
 test('v2 migration preserves a baseline and saved requests; captures are immutable and capped at 50', async () => {
-  assert.equal((await storage.database).version, 3)
+  assert.equal((await storage.database).version, 4)
   assert.equal((await storage.getSchemaVersions(profile.id)).length, 1)
   assert.equal((await storage.getRequests())[0].id, 'r')
   assert.equal(

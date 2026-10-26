@@ -57,6 +57,7 @@ export type Page =
   | 'ai'
   | 'requests'
   | 'history'
+  | 'handoff'
 
 const field = (
   name: string,
