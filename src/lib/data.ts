@@ -48,6 +48,8 @@ export type Profile = {
   apiVersion?: string
 }
 export type Page =
+  | 'entity-overview'
+  | 'api'
   | 'overview'
   | 'schema'
   | 'records'

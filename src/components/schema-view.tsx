@@ -2,23 +2,24 @@ import { useState } from 'react'
 import {
   ArrowDown,
   ArrowUpRight,
-  ArrowLeftRight,
-  Star,
-  Info,
   Check,
   ChevronRight,
-  Code2,
   Copy,
   KeyRound,
   Link2,
   Search,
-  Sparkles,
   Table2,
 } from 'lucide-react'
 import type { Entity, Field, Protocol } from '@/lib/data'
 import { useWorkspace } from '@/lib/workspace'
-import { generate } from '@/lib/generators'
 import { Button } from './ui/button'
+import { MoreHorizontal } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 import { CompareDialog } from './compare-dialog'
 import {
   Dialog,
@@ -34,23 +35,18 @@ export function SchemaView({
   entity,
   protocol,
   onRecords,
-  onGenerate,
   onRelationships,
   initialField,
-  isFavorite,
-  onFavorite,
 }: {
   entity: Entity
   protocol: Protocol
   onRecords: () => void
-  onGenerate: () => void
   onRelationships: () => void
   initialField?: string
-  isFavorite: boolean
-  onFavorite: () => void
 }) {
-  const { profile, snapshot } = useWorkspace()
+  const { snapshot } = useWorkspace()
   const [search, setSearch] = useState('')
+  const [fieldDetailsOpen, setFieldDetailsOpen] = useState(!!initialField)
   const [compareOpen, setCompareOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [selectedName, setSelectedName] = useState(
@@ -80,42 +76,27 @@ export function SchemaView({
     )
   return (
     <>
-      <div className="entity-heading">
-        <div className="entity-icon">
-          <Table2 size={22} />
-        </div>
+      <div className="entity-subview-toolbar">
+        <span>Field definitions</span>
         <div>
-          <div className="entity-name">
-            <h2>{entity.name}</h2>
-            <span className="tag neutral">
-              {protocol === 'Data API' ? 'Layout' : 'Entity set'}
-            </span>
-          </div>
-          <p>{entity.description}</p>
-        </div>
-        <div className="entity-actions">
-          <IconButton
-            label={isFavorite ? 'Remove from favorites' : 'Favorite resource'}
-            onClick={onFavorite}
-          >
-            <Star
-              size={15}
-              className={isFavorite ? 'amber fill-current' : ''}
-            />
-          </IconButton>
-          <IconButton
-            label="Resource details"
-            onClick={() => setDetailsOpen(true)}
-          >
-            <Info size={15} />
-          </IconButton>
-          <Button variant="outline" onClick={() => setCompareOpen(true)}>
-            <ArrowLeftRight size={14} />
-            Compare
+          <Button variant="ghost" onClick={onRecords}>
+            Browse records
           </Button>
-          <Button variant="outline" onClick={onRecords}>
-            Browse records <ArrowUpRight size={14} />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Schema actions">
+                <MoreHorizontal size={18} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setCompareOpen(true)}>
+                Compare tables
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setDetailsOpen(true)}>
+                Resource metadata
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <CompareDialog
@@ -201,7 +182,10 @@ export function SchemaView({
                   <tr
                     key={f.name}
                     className={selected.name === f.name ? 'selected' : ''}
-                    onClick={() => setSelectedName(f.name)}
+                    onClick={() => {
+                      setSelectedName(f.name)
+                      setFieldDetailsOpen(true)
+                    }}
                   >
                     <td className="row-index">
                       {String(i + 1).padStart(2, '0')}
@@ -209,7 +193,10 @@ export function SchemaView({
                     <td>
                       <button
                         className="field-name"
-                        onClick={() => setSelectedName(f.name)}
+                        onClick={() => {
+                          setSelectedName(f.name)
+                          setFieldDetailsOpen(true)
+                        }}
                       >
                         <TypeIcon type={f.type} />
                         {f.name}
@@ -230,10 +217,14 @@ export function SchemaView({
                           <span className="attribute reference">
                             Foreign key
                           </span>
-                        ) : f.required ? (
+                        ) : f.required || f.nullable === false ? (
                           <span className="attribute">Required</span>
                         ) : (
-                          <span className="attribute optional">Optional</span>
+                          <span className="attribute optional">
+                            {f.required === false || f.nullable === true
+                              ? 'Optional'
+                              : 'Unknown'}
+                          </span>
                         )}
                         {f.auto && <span className="auto-tag">Auto</span>}
                       </div>
@@ -265,33 +256,23 @@ export function SchemaView({
             </span>
           </div>
         </section>
-        <FieldInspector
-          field={selected}
-          entity={entity}
-          onRelationships={onRelationships}
-        />
       </div>
-      <section className="code-section">
-        <div className="section-intro">
-          <div>
-            <span className="eyebrow">
-              <Code2 size={14} /> BUILT FOR YOUR NEXT BUILD
-            </span>
-            <h3>Your schema. Ready for code.</h3>
-            <p>
-              Turn this layout into typed interfaces, API specs, and agent
-              context.
-            </p>
-          </div>
-          <Button variant="outline" onClick={onGenerate}>
-            Open developer tools <ArrowUpRight size={14} />
-          </Button>
-        </div>
-        <CodeBlock
-          code={generate(entity, 'typescript', protocol, { profile, snapshot })}
-          filename={`${entity.name.toLowerCase()}.ts`}
-        />
-      </section>
+      <Dialog open={fieldDetailsOpen} onOpenChange={setFieldDetailsOpen}>
+        <DialogContent className="field-info-dialog">
+          <DialogHeader>
+            <DialogTitle>{selected.name}</DialogTitle>
+            <DialogDescription>{entity.name} / Field details</DialogDescription>
+          </DialogHeader>
+          <FieldInspector
+            field={selected}
+            entity={entity}
+            onRelationships={() => {
+              setFieldDetailsOpen(false)
+              onRelationships()
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
@@ -410,10 +391,6 @@ function FieldInspector({
           </button>
         </div>
       )}
-      <div className="inspector-note">
-        <Sparkles size={14} />
-        <span>One schema. Every integration.</span>
-      </div>
     </aside>
   )
 }

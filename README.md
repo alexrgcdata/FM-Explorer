@@ -173,7 +173,9 @@ Copyright © 2026 Alex Seidler.
 
 ## Workspace navigation and welcome
 
-The first header row contains the product, connection switcher, search, and utilities. The amber-accented second row switches work areas. The left rail is dedicated to resources, with a saved collapse preference; on smaller screens, Resources opens a drawer. Fields, Records, and Relationships remain available as tabs for the selected resource. Database-wide statistics are on Overview.
+The selected entity is the main object: its name, observed or developer-confirmed description, and factual counts lead the page. Five persistent tabs organize **Overview, Schema, Relationships, API, and AI**. Overview brings together declared keys, reported counts, exposed connections, saved integration checks, and developer knowledge. Unknown business meaning stays explicit; the app does not infer API usage or workflow rules from field names.
+
+A single quiet header contains the connection switcher, search, utilities, and a **Workspace** menu for database-wide tools such as history, saved checks, and handoff packages. The narrow resource list can collapse and becomes a drawer on smaller screens. Field details open on demand; records remain under Schema, and queries and generated types remain under API. Clicking Schema or API returns directly from these subviews. Metadata and context previews stay collapsed until requested.
 
 A dismissible welcome screen credits **Alex Seidler / RGC Data Solutions**, linking to [rgcdata.com](https://rgcdata.com/) for custom FileMaker ↔ web ↔ mobile integrations, hosting, and complex development projects. Its optional five-step guide links to the relevant screens. X, Escape, or Explore workspace closes it. **Don't show this on startup** is saved locally in IndexedDB. **Help & shortcuts → Welcome & quick start** reopens it. The guide does not connect, execute a query, or open the external site automatically.
 

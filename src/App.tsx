@@ -62,14 +62,20 @@ import {
 } from './components/ui/dropdown-menu'
 import { Switch } from './components/ui/switch'
 import { TooltipProvider } from './components/ui/tooltip'
-import { Choice, IconButton, TypeIcon } from './components/shared'
+import { IconButton, TypeIcon } from './components/shared'
 import { SchemaView } from './components/schema-view'
 import { RecordsView } from './components/records-view'
 import { QueryView } from './components/query-view'
 import { GenerateView } from './components/generate-view'
 import { ConnectionManager } from './components/connection-manager'
 import { SavedRequestsView } from './components/saved-requests-view'
-import { ResourceWorkspace } from './components/resource-workspace'
+import { EntityOverview } from './components/entity-overview'
+import { EntityApi } from './components/entity-api'
+import { EntityAi } from './components/entity-ai'
+import {
+  ResourceWorkspace,
+  isEntityPage,
+} from './components/resource-workspace'
 import { SchemaHistoryView } from './components/schema-history-view'
 import { WelcomeDialog } from './components/welcome-dialog'
 import type { SavedRequest } from './lib/saved-requests'
@@ -85,6 +91,8 @@ const HandoffView = lazy(() =>
   })),
 )
 const navigation = [
+  { id: 'entity-overview', title: 'Entity overview', icon: Table2 },
+  { id: 'api', title: 'Entity API', icon: Terminal },
   { id: 'overview', title: 'Overview', icon: LayoutDashboard },
   { id: 'schema', title: 'Schema explorer', icon: Table2 },
   { id: 'history', title: 'Schema history', icon: History },
@@ -96,19 +104,9 @@ const navigation = [
   { id: 'handoff', title: 'Handoff package', icon: Package },
   { id: 'ai', title: 'AI tools', icon: Sparkles },
 ] as const
-const navLabels: Record<Page, string> = {
-  overview: 'Overview',
-  schema: 'Schema',
-  history: 'History',
-  records: 'Records',
-  relationships: 'Relations',
-  query: 'Queries',
-  requests: 'Saved checks',
-  developer: 'Developer',
-  handoff: 'Handoff',
-  ai: 'AI tools',
-}
 const descriptions: Record<Page, string> = {
+  'entity-overview': 'Understand this entity.',
+  api: 'Read access and integration expectations.',
   overview: 'A clearer view of your FileMaker solution.',
   schema: 'Understand your structure. Find exactly what you need.',
   records: 'Your records, without the guesswork.',
@@ -131,11 +129,10 @@ export default function App() {
 }
 function Explorer() {
   const headerRef = useRef<HTMLElement>(null)
-  const navRef = useRef<HTMLElement>(null)
   const [headerHeight, setHeaderHeight] = useState(154)
   const w = useWorkspace(),
     { profile, entities, relationships, snapshot, session } = w
-  const [page, setPage] = useState<Page>('schema'),
+  const [page, setPage] = useState<Page>('entity-overview'),
     [requestFilter, setRequestFilter] = useState(''),
     [entityName, setEntityName] = useState('Customers'),
     [sidebarOpen, setSidebarOpen] = useState(false),
@@ -160,11 +157,6 @@ function Explorer() {
     setSidebarOpen(false)
   }
   useEffect(() => {
-    navRef.current
-      ?.querySelector<HTMLButtonElement>('[aria-current="page"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
-  }, [page, w.ready])
-  useEffect(() => {
     const header = headerRef.current
     if (!header) return
     const observer = new ResizeObserver(() =>
@@ -176,10 +168,13 @@ function Explorer() {
   useEffect(() => {
     if (w.ready && !w.startupError && !w.welcomeHidden) setWelcomeOpen(true)
   }, [w.ready, w.startupError, w.welcomeHidden])
-  function selectEntity(name: string, next: Page = page) {
+  function selectEntity(
+    name: string,
+    next: Page = isEntityPage(page) ? page : 'entity-overview',
+  ) {
     setEntityName(name)
     setFieldFocus(undefined)
-    navigate(next === 'overview' ? 'schema' : next)
+    navigate(next === 'overview' ? 'entity-overview' : next)
   }
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -202,9 +197,9 @@ function Explorer() {
     return () => document.removeEventListener('keydown', handler)
   }, [])
   useEffect(() => {
-    document.title = `${current.title} · FM API Explorer`
+    document.title = `${entity && isEntityPage(page) ? `${entity.name} · ` : ''}${current.title} · FM API Explorer`
     window.scrollTo(0, 0)
-  }, [current.title, profile.id, entityName])
+  }, [current.title, profile.id, entityName, page])
   async function refresh() {
     try {
       await w.refresh()
@@ -264,7 +259,7 @@ function Explorer() {
     recordCount = counted.reduce((n, e) => n + (e.count ?? 0), 0)
   return (
     <div
-      className={`app-shell ${w.reducedMotion ? 'reduce-motion' : ''}`}
+      className={`app-shell object-shell ${w.reducedMotion ? 'reduce-motion' : ''}`}
       style={
         { '--workbench-header-height': `${headerHeight}px` } as CSSProperties
       }
@@ -279,7 +274,7 @@ function Explorer() {
             href="#"
             onClick={(e) => {
               e.preventDefault()
-              navigate('overview')
+              navigate('entity-overview')
             }}
           >
             <span className="brand-mark">
@@ -359,7 +354,7 @@ function Explorer() {
             onClick={() => setSearchOpen(true)}
           >
             <Search size={17} />
-            <span>Search schema & tools</span>
+            <span>Search entities & fields</span>
             <kbd>Ctrl K</kbd>
           </button>
           <span className={`workbench-health ${session ? 'online' : ''}`}>
@@ -372,6 +367,48 @@ function Explorer() {
                 ? 'Saved schema'
                 : 'Disconnected'}
           </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="workspace-menu-trigger">
+                Workspace
+                <ChevronDown size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {navigation
+                .filter((item) =>
+                  [
+                    'overview',
+                    'history',
+                    'requests',
+                    'handoff',
+                    'query',
+                    'developer',
+                  ].includes(item.id),
+                )
+                .map((item) => (
+                  <DropdownMenuItem
+                    key={item.id}
+                    onSelect={() => navigate(item.id)}
+                  >
+                    <item.icon size={16} />
+                    {item.id === 'overview' ? 'Database overview' : item.title}
+                  </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <button
+            className="object-resource-toggle"
+            aria-label="Browse entities"
+            aria-expanded={sidebarOpen}
+            onClick={() => {
+              setSidebarOpen(!sidebarOpen)
+              if (w.resourceRailCollapsed)
+                void w.setResourceRailCollapsed(false)
+            }}
+          >
+            <Menu size={19} />
+          </button>
           <div className="workbench-utilities">
             <IconButton
               label="Connections"
@@ -389,37 +426,6 @@ function Explorer() {
               <Settings2 size={18} />
             </IconButton>
           </div>
-        </div>
-        <div className="workbench-nav-row">
-          <button
-            className="resource-drawer-toggle"
-            onClick={() => {
-              setSidebarOpen(!sidebarOpen)
-              if (w.resourceRailCollapsed)
-                void w.setResourceRailCollapsed(false)
-            }}
-            aria-expanded={sidebarOpen}
-          >
-            <Menu size={18} />
-            Resources
-          </button>
-          <nav
-            className="workspace-tabs"
-            ref={navRef}
-            aria-label="Workspace navigation"
-          >
-            {navigation.map((item) => (
-              <button
-                key={item.id}
-                className={page === item.id ? 'active' : ''}
-                aria-current={page === item.id ? 'page' : undefined}
-                onClick={() => navigate(item.id)}
-              >
-                <item.icon size={18} />
-                <span>{navLabels[item.id]}</span>
-              </button>
-            ))}
-          </nav>
         </div>
       </header>
       <div
@@ -605,7 +611,9 @@ function Explorer() {
         </aside>
         <div className="workbench-main">
           <main id="main-content" className="main-content" tabIndex={-1}>
-            <div className="page-heading">
+            <div
+              className={`page-heading ${isEntityPage(page) && entity ? 'entity-page-heading' : ''}`}
+            >
               <div>
                 <div className="page-overline">
                   <span className="amber-square" />
@@ -666,7 +674,7 @@ function Explorer() {
                 {w.storageError}
               </div>
             )}
-            {profile.lab && (
+            {profile.lab && !isEntityPage(page) && (
               <div className="source-banner">
                 <ShieldCheck size={14} />
                 <span>
@@ -679,7 +687,7 @@ function Explorer() {
                 </button>
               </div>
             )}
-            {snapshot && !session && (
+            {snapshot && !session && !isEntityPage(page) && (
               <div className="offline-banner">
                 <Unplug size={15} />
                 Saved schema from{' '}
@@ -753,7 +761,7 @@ function Explorer() {
               </section>
             ) : (
               <>
-                {snapshot.warnings.length > 0 && (
+                {snapshot.warnings.length > 0 && !isEntityPage(page) && (
                   <details className="discovery-notes">
                     <summary>
                       {snapshot.complete
@@ -878,35 +886,37 @@ function Explorer() {
                       page={page}
                       entity={entity}
                       onNavigate={navigate}
-                      onEntity={(name) => selectEntity(name)}
+                      onConnect={() => setAuthProfile(profile)}
                     >
+                      {page === 'entity-overview' && (
+                        <EntityOverview
+                          key={profile.id + entity.name}
+                          entity={entity}
+                          onNavigate={navigate}
+                          onEntity={(name) =>
+                            selectEntity(name, 'entity-overview')
+                          }
+                        />
+                      )}
+                      {page === 'api' && (
+                        <EntityApi entity={entity} onNavigate={navigate} />
+                      )}
+                      {page === 'ai' && (
+                        <EntityAi
+                          key={profile.id + entity.name}
+                          entity={entity}
+                          onNavigate={navigate}
+                        />
+                      )}
                       {page === 'schema' && (
                         <SchemaView
                           key={`${profile.id}:${entity.name}:${fieldFocus ?? ''}`}
                           initialField={fieldFocus}
-                          isFavorite={w.favorites.includes(entity.name)}
-                          onFavorite={() => void w.toggleFavorite(entity.name)}
                           entity={entity}
                           protocol={profile.protocol}
                           onRecords={() => navigate('records')}
-                          onGenerate={() => navigate('developer')}
                           onRelationships={() => navigate('relationships')}
                         />
-                      )}
-                      {page === 'query' && (
-                        <div className="resource-selector">
-                          <Table2 size={14} />
-                          <span>Resource</span>
-                          <Choice
-                            label="Selected resource"
-                            value={entity.name}
-                            onChange={(name) => selectEntity(name)}
-                            items={entities.map((e) => ({
-                              value: e.name,
-                              label: e.name,
-                            }))}
-                          />
-                        </div>
                       )}
                       {page === 'records' && (
                         <RecordsView
@@ -945,14 +955,12 @@ function Explorer() {
                           />
                         </Suspense>
                       )}
-                      {(page === 'developer' || page === 'ai') && (
+                      {page === 'developer' && (
                         <GenerateView
                           key={`${profile.id}:${page}`}
                           entity={entity}
                           entities={entities}
                           protocol={profile.protocol}
-                          ai={page === 'ai'}
-                          onEntity={setEntityName}
                         />
                       )}
                     </ResourceWorkspace>
@@ -973,7 +981,7 @@ function Explorer() {
                   : snapshot
                     ? 'Saved schema'
                     : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.5.0
+                <span className="footer-dot">·</span>v0.6.0
               </span>
             </footer>
           </main>

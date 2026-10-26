@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import {
-  ArrowUpRight,
   BookOpen,
-  Braces,
-  Check,
   Code2,
   Download,
   FileCode2,
   FileJson,
   PlugZap,
-  ShieldCheck,
   Sparkles,
   Terminal,
 } from 'lucide-react'
@@ -75,13 +71,11 @@ export function GenerateView({
   entity,
   protocol,
   ai = false,
-  onEntity,
   entities: options,
 }: {
   entity: Entity
   protocol: Protocol
   ai?: boolean
-  onEntity: (name: string) => void
   entities: Entity[]
 }) {
   const { profile, snapshot, relationships, session } = useWorkspace()
@@ -106,55 +100,17 @@ export function GenerateView({
   const filename = `${all && kind === 'markdown' ? profile.database : entity.name.toLowerCase()}.${selected.extension}`
   return (
     <>
-      <div className="view-intro">
-        <div>
-          <h2>
-            {ai
-              ? 'Give your agents the full picture.'
-              : 'Less boilerplate. More building.'}
-          </h2>
-          <p>
-            {ai
-              ? 'Clear, structured context for your next AI-powered integration.'
-              : 'Turn your schema into a useful starting point for your integration.'}
-          </p>
-        </div>
-        <span className="tag neutral">
-          <Braces size={12} />
-          Schema-powered
-        </span>
-      </div>
-      <div className={`generator-options ${ai ? 'two' : ''}`}>
-        {tools.map((tool) => (
-          <button
-            key={tool.id}
-            className={`generator-card ${kind === tool.id ? 'active' : ''}`}
-            onClick={() => setKind(tool.id)}
-          >
-            <span className="tool-icon">
-              <tool.icon size={20} />
-            </span>
-            <strong>{tool.title}</strong>
-            <span>{tool.subtitle}</span>
-            {kind === tool.id && (
-              <Check size={14} className="selection-check" />
-            )}
-          </button>
-        ))}
+      <div className="entity-format-selector">
+        <Choice
+          label="Document format"
+          value={kind}
+          onChange={(value) => setKind(value as ExportKind)}
+          items={tools.map((tool) => ({ value: tool.id, label: tool.title }))}
+        />
       </div>
       <div className="panel generator-workspace">
         <div className="generator-toolbar">
-          <div>
-            <span className="muted">
-              {protocol === 'Data API' ? 'Layout' : 'Entity set'}
-            </span>
-            <Choice
-              label="Export resource"
-              value={entity.name}
-              onChange={onEntity}
-              items={options.map((e) => ({ value: e.name, label: e.name }))}
-            />
-          </div>
+          <span className="muted">{filename}</span>
           <Button
             onClick={() =>
               downloadFile(
@@ -192,34 +148,6 @@ export function GenerateView({
           </div>
         )}
         <CodeBlock code={code} filename={filename} />
-      </div>
-      <div className="generator-notes">
-        <div>
-          <ShieldCheck size={19} />
-          <span>
-            <strong>{ai ? 'Private by default' : 'Generated locally'}</strong>
-            <p>
-              {ai
-                ? 'No AI service is called. No record values or credentials are included.'
-                : 'No external services. Exports use the inspected metadata.'}
-            </p>
-          </span>
-        </div>
-        <div>
-          <ArrowUpRight size={19} />
-          <span>
-            <strong>
-              {kind === 'mcp'
-                ? 'A definition is a starting point'
-                : 'Made to be adapted'}
-            </strong>
-            <p>
-              {kind === 'mcp'
-                ? 'A working MCP server needs handlers, authentication, and validation.'
-                : 'Verify types and requests against your live endpoint when connected.'}
-            </p>
-          </span>
-        </div>
       </div>
     </>
   )
