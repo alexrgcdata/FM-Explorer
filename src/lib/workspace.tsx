@@ -19,6 +19,7 @@ import {
 } from './contracts'
 import { api, bootstrap, ClientError } from './api'
 import * as storage from './storage'
+import type { SchemaVersion } from './schema-history'
 import {
   evaluateCheck,
   savedRequestSchema,
@@ -41,6 +42,7 @@ function useWorkspaceState() {
     [reducedMotion, setMotionState] = useState(false)
   const [savedRequests, setSavedRequests] = useState<SavedRequest[]>([]),
     [checkRuns, setCheckRuns] = useState<CheckRun[]>([])
+  const [schemaVersions, setSchemaVersions] = useState<SchemaVersion[]>([])
   const mounted = useRef(true),
     connecting = useRef(false)
   const profile = profiles.find((p) => p.id === activeId) ?? profiles[0],
@@ -54,6 +56,18 @@ function useWorkspaceState() {
         'IndexedDB could not save this change. Your current session is still usable; browser storage may be full or unavailable.',
       )
     }
+  }
+  async function captureSchema(value: Snapshot, p?: Profile) {
+    await persist(
+      (async () => {
+        await storage.saveSnapshot(value, p)
+        const versions = await storage.getSchemaVersions(value.profileId)
+        setSchemaVersions((current) => [
+          ...current.filter((v) => v.profileId !== value.profileId),
+          ...versions,
+        ])
+      })(),
+    )
   }
   useEffect(() => {
     mounted.current = true
@@ -80,6 +94,9 @@ function useWorkspaceState() {
         const history = await storage.getActivity()
         const requests = await storage.getRequests(),
           runs = await storage.getCheckRuns()
+        const versions = (
+          await Promise.all(list.map((p) => storage.getSchemaVersions(p.id)))
+        ).flat()
         if (cancelled) return
         setProfiles(list)
         setSnapshots(Object.fromEntries(cached.map((s) => [s.profileId, s])))
@@ -88,6 +105,7 @@ function useWorkspaceState() {
         setActivity(history)
         setSavedRequests(requests)
         setCheckRuns(runs)
+        setSchemaVersions(versions)
         setCompactState(await storage.preference('compact', false))
         setMotionState(await storage.preference('reduced-motion', false))
         await bootstrap()
@@ -164,7 +182,7 @@ function useWorkspaceState() {
       const result = await api.connect(p, auth)
       setSessions((current) => ({ ...current, [p.id]: result.session }))
       setSnapshots((current) => ({ ...current, [p.id]: result.snapshot }))
-      await persist(storage.saveSnapshot(result.snapshot))
+      await captureSchema(result.snapshot, p)
       await selectProfile(p.id)
       await log(
         p.id,
@@ -196,7 +214,10 @@ function useWorkspaceState() {
       const result = await api.refresh(connected.id)
       setSnapshots((current) => ({ ...current, [profileId]: result.snapshot }))
       setSessions((current) => ({ ...current, [profileId]: result.session }))
-      await persist(storage.saveSnapshot(result.snapshot))
+      await captureSchema(
+        result.snapshot,
+        profiles.find((p) => p.id === profileId),
+      )
       await log(
         profileId,
         'Schema refreshed',
@@ -260,6 +281,7 @@ function useWorkspaceState() {
     setActivity((current) => current.filter((e) => e.profileId !== id))
     setSavedRequests((current) => current.filter((r) => r.profileId !== id))
     setCheckRuns((current) => current.filter((r) => r.profileId !== id))
+    setSchemaVersions((current) => current.filter((v) => v.profileId !== id))
     if (activeId === id) await selectProfile('lab-data')
   }
   async function loadRecords(
@@ -418,10 +440,11 @@ function useWorkspaceState() {
   async function forgetSnapshots() {
     await persist(
       (async () => {
-        await (await storage.database).clear('snapshots')
+        await storage.clearSnapshots()
       })(),
     )
     setSnapshots({})
+    setSchemaVersions([])
     toast.success('Saved schema snapshots cleared')
   }
   return {
@@ -458,6 +481,7 @@ function useWorkspaceState() {
     saveRequest,
     deleteSavedRequest,
     runSavedRequest,
+    schemaVersions: schemaVersions.filter((v) => v.profileId === profile.id),
   }
 }
 type Workspace = ReturnType<typeof useWorkspaceState>

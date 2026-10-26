@@ -1,6 +1,7 @@
 import { openDB, type DBSchema } from 'idb'
 import type { Profile } from './data'
 import type { ActivityEntry, Snapshot } from './contracts'
+import { makeSchemaVersion, type SchemaVersion } from './schema-history'
 import {
   savedRequestSchema,
   type CheckRun,
@@ -10,6 +11,11 @@ import {
 interface ExplorerDB extends DBSchema {
   profiles: { key: string; value: Profile }
   snapshots: { key: string; value: Snapshot }
+  schemaVersions: {
+    key: string
+    value: SchemaVersion
+    indexes: { 'by-profile': string }
+  }
   preferences: { key: string; value: unknown }
   requests: {
     key: string
@@ -27,8 +33,8 @@ interface ExplorerDB extends DBSchema {
     indexes: { 'by-time': string }
   }
 }
-export const database = openDB<ExplorerDB>('fm-api-explorer', 2, {
-  upgrade(db, oldVersion) {
+export const database = openDB<ExplorerDB>('fm-api-explorer', 3, {
+  upgrade(db, oldVersion, _newVersion, transaction) {
     if (oldVersion < 1) {
       db.createObjectStore('profiles', { keyPath: 'id' })
       db.createObjectStore('snapshots', { keyPath: 'profileId' })
@@ -46,6 +52,16 @@ export const database = openDB<ExplorerDB>('fm-api-explorer', 2, {
       const runs = db.createObjectStore('checkRuns', { keyPath: 'id' })
       runs.createIndex('by-request', 'requestId')
       runs.createIndex('by-time', 'at')
+    }
+    if (oldVersion < 3) {
+      const versions = db.createObjectStore('schemaVersions', { keyPath: 'id' })
+      versions.createIndex('by-profile', 'profileId')
+      const request = transaction.objectStore('snapshots').openCursor()
+      void request.then(async function migrate(cursor) {
+        if (!cursor) return
+        await versions.put(makeSchemaVersion(cursor.value))
+        await migrate(await cursor.continue())
+      })
     }
   },
   blocking(_current, _next, event) {
@@ -69,12 +85,40 @@ export async function saveProfile(profile: Profile) {
 export async function getProfiles() {
   return (await database).getAll('profiles')
 }
-export async function saveSnapshot(snapshot: Snapshot) {
+export async function saveSnapshot(snapshot: Snapshot, profile?: Profile) {
   const safe = {
     ...snapshot,
     entities: snapshot.entities.map((e) => ({ ...e, rows: [] })),
   }
-  await (await database).put('snapshots', safe)
+  const db = await database,
+    tx = db.transaction(['snapshots', 'schemaVersions'], 'readwrite')
+  await tx.objectStore('snapshots').put(safe)
+  if (!(await tx.objectStore('schemaVersions').get(snapshot.id)))
+    await tx
+      .objectStore('schemaVersions')
+      .add(makeSchemaVersion(snapshot, profile))
+  const versions = await tx
+    .objectStore('schemaVersions')
+    .index('by-profile')
+    .getAll(snapshot.profileId)
+  versions.sort((a, b) => b.inspectedAt.localeCompare(a.inspectedAt))
+  for (const old of versions.slice(50))
+    await tx.objectStore('schemaVersions').delete(old.id)
+  await tx.done
+}
+export async function getSchemaVersions(profileId: string) {
+  return (
+    await (
+      await database
+    ).getAllFromIndex('schemaVersions', 'by-profile', profileId)
+  ).sort((a, b) => b.inspectedAt.localeCompare(a.inspectedAt))
+}
+export async function clearSnapshots() {
+  const db = await database,
+    tx = db.transaction(['snapshots', 'schemaVersions'], 'readwrite')
+  await tx.objectStore('snapshots').clear()
+  await tx.objectStore('schemaVersions').clear()
+  await tx.done
 }
 export async function getSnapshot(id: string) {
   return (await database).get('snapshots', id)
@@ -82,11 +126,23 @@ export async function getSnapshot(id: string) {
 export async function removeProfile(id: string) {
   const db = await database
   const tx = db.transaction(
-    ['profiles', 'snapshots', 'activity', 'requests', 'checkRuns'],
+    [
+      'profiles',
+      'snapshots',
+      'schemaVersions',
+      'activity',
+      'requests',
+      'checkRuns',
+    ],
     'readwrite',
   )
   await tx.objectStore('profiles').delete(id)
   await tx.objectStore('snapshots').delete(id)
+  for (const key of await tx
+    .objectStore('schemaVersions')
+    .index('by-profile')
+    .getAllKeys(id))
+    await tx.objectStore('schemaVersions').delete(key)
   const logs = await tx.objectStore('activity').getAll()
   for (const log of logs)
     if (log.profileId === id) await tx.objectStore('activity').delete(log.id)

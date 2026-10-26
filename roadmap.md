@@ -12,7 +12,7 @@ Create a reusable library of named queries per connection. Save explicit expecta
 
 Acceptance: save a query, reload, run it successfully, deliberately create an incorrect expectation, observe a useful failure, fix it, and export a definition/result summary without record values. Offline saved requests remain readable; execution requires an active connection. Checks cover a bounded returned page, not an entire database.
 
-## Step 2 — Keep schema versions and compare changes (next)
+## Step 2 — Keep schema versions and compare changes (implemented locally)
 
 Preserve dated schema versions instead of overwriting the previous version. Compare added/removed resources and fields, native type/nullability/key changes, and exposed navigation. Associate each snapshot with its source, protocol, account-visible scope, completeness, and warnings. Link changed fields to saved requests that use or expect them. Treat missing metadata from partial discovery as unknown, not a confirmed deletion.
 
@@ -46,4 +46,6 @@ Improve installation, update/recovery behavior, performance, documentation, and 
 
 Step 1 is implemented. Seventeen automated tests pass, including v1-to-v2 IndexedDB migration, request persistence, 200-result retention, deletion cascades, response evaluation, and redacted export defaults. Browser verification covered saving an Active-customer query, a successful check, a deliberately incorrect FullName number expectation producing seven type mismatches, correcting it, running the suite, exporting, and reloading with all three summaries preserved. No console errors were observed in this flow.
 
-Steps 2–6 remain planned. No new external endpoint, production write, automatic monitoring, AI provider, or deployment was used. Continue using the local lab until Alex supplies an approved real target. The next implementation is Step 2: dated schema versions and comparisons linked to affected requests.
+Step 2 is now implemented locally. IndexedDB v3 preserves a migrated baseline plus up to 50 versions per connection. Structural comparisons qualify partial/unknown metadata and link changed fields to saved request expectations, filters and sorts. The lab example is an illustrative comparison, not a change to the running synthetic server. Browser verification covered real refreshes producing unchanged comparisons, the illustrative changed comparison, affected-request navigation, JSON export, and responsive widths. Twenty-five automated tests cover the combined application, including migration, history immutability/retention, scope mismatch, partial discovery and change impact. Real FileMaker interoperability remains unverified.
+
+Steps 3–6 remain planned. No new external endpoint, production write, automatic monitoring, AI provider, or deployment was used. Continue using the local lab until Alex supplies an approved real target. The next implementation is Step 3: a portable integration and AI handoff package.

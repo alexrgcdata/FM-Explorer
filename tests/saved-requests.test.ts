@@ -151,7 +151,7 @@ test('v1 migration preserves settings; requests persist, history is bounded and 
     await storage.preference('migration-sentinel', 'missing'),
     'preserved',
   )
-  assert.equal((await storage.database).version, 2)
+  assert.equal((await storage.database).version, 3)
   await storage.saveRequest(definition)
   assert.equal((await storage.getRequests())[0].name, 'Customer read')
   for (let i = 0; i < 202; i++)

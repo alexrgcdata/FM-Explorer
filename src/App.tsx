@@ -15,6 +15,7 @@ import {
   Database,
   DatabaseZap,
   GitBranch,
+  History,
   LayoutDashboard,
   Menu,
   Plus,
@@ -59,6 +60,7 @@ import { QueryView } from './components/query-view'
 import { GenerateView } from './components/generate-view'
 import { ConnectionManager } from './components/connection-manager'
 import { SavedRequestsView } from './components/saved-requests-view'
+import { SchemaHistoryView } from './components/schema-history-view'
 import type { SavedRequest } from './lib/saved-requests'
 import {
   ConnectionDialog,
@@ -69,6 +71,7 @@ const RelationshipView = lazy(() => import('./components/relationship-view'))
 const navigation = [
   { id: 'overview', title: 'Overview', icon: LayoutDashboard },
   { id: 'schema', title: 'Schema explorer', icon: Table2 },
+  { id: 'history', title: 'Schema history', icon: History },
   { id: 'records', title: 'Data browser', icon: Database },
   { id: 'relationships', title: 'Relationships', icon: GitBranch },
   { id: 'query', title: 'Query builder', icon: Terminal },
@@ -85,6 +88,7 @@ const descriptions: Record<Page, string> = {
   developer: 'Your schema, translated into your stack.',
   ai: 'Make your solution understandable to agents.',
   requests: 'Reusable requests. Clear expectations. Repeatable checks.',
+  history: 'Dated schemas. Visible changes. Integration impact.',
 }
 export default function App() {
   return (
@@ -99,6 +103,7 @@ function Explorer() {
   const w = useWorkspace(),
     { profile, entities, relationships, snapshot, session } = w
   const [page, setPage] = useState<Page>('schema'),
+    [requestFilter, setRequestFilter] = useState(''),
     [entityName, setEntityName] = useState('Customers'),
     [sidebarOpen, setSidebarOpen] = useState(false),
     [treeOpen, setTreeOpen] = useState(true),
@@ -116,6 +121,7 @@ function Explorer() {
   const entity = entities.find((e) => e.name === entityName) ?? entities[0],
     current = navigation.find((n) => n.id === page)!
   function navigate(next: Page) {
+    setRequestFilter('')
     setPage(next)
     setSidebarOpen(false)
   }
@@ -578,11 +584,20 @@ function Explorer() {
           )}
           {page === 'requests' ? (
             <SavedRequestsView
-              key={profile.id}
+              key={`${profile.id}:${requestFilter}`}
+              initialSearch={requestFilter}
               onOpenBuilder={(request) => {
                 setEditingRequest(request)
                 if (request) setEntityName(request.query.entity)
                 navigate('query')
+              }}
+            />
+          ) : page === 'history' ? (
+            <SchemaHistoryView
+              key={profile.id}
+              onOpenRequest={(request) => {
+                navigate('requests')
+                setRequestFilter(request.name)
               }}
             />
           ) : !snapshot ? (
@@ -837,7 +852,7 @@ function Explorer() {
                 : snapshot
                   ? 'Saved schema'
                   : 'Ready to connect'}
-              <span className="footer-dot">·</span>v0.2.0
+              <span className="footer-dot">·</span>v0.3.0
             </span>
           </footer>
         </main>
@@ -960,7 +975,7 @@ function Explorer() {
             </p>
           </div>
           <Button variant="outline" onClick={() => void w.forgetSnapshots()}>
-            Clear saved schema snapshots
+            Clear saved schemas & version history
           </Button>
         </DialogContent>
       </Dialog>

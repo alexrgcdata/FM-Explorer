@@ -39,6 +39,16 @@ Definitions and the latest 200 result summaries across connections persist in In
 
 Export creates versioned JSON request definitions and summaries, with filter values redacted by default and `requiresFilterValues` marking definitions needing those values again. This release does not import or automatically execute exported definitions. Empty results make selected field checks inconclusive; a minimum-row failure still fails. Checks cover the returned page, not every record or a FileMaker backup.
 
+## Schema history and comparisons
+
+Open **Schema history**. Connecting or selecting **Capture current schema** preserves an inspection; choose earlier/later versions to compare resources, field names, normalized/native types, nullability, keys, indexes, and exposed navigation. History retains the latest 50 versions per connection. Older snapshots migrate into a baseline when IndexedDB upgrades to v3.
+
+The comparison lists saved requests whose conditions, sorting, or field expectations reference changed metadata. **Review saved check** opens the matching request for manual review and rerunning. Comparisons do not execute queries automatically. **Export comparison** downloads JSON containing both schema versions, differences, scope notes, and affected-request references; it excludes record rows, saved query bodies/filter values, and authentication.
+
+**Preview change example** is available for local lab connections. It illustrates an added AccountTier field, a missing Email field, and a changed FullName type. This example does not modify the lab, saved history, or a real database.
+
+Missing metadata from partial discovery is marked unknown. A resource no longer exposed is not proof of deletion; account permissions can change visibility. Account identity/privileges are not fingerprinted, and migrated baselines lack saved target-host details. Versions from different known targets, protocols, databases, API versions, or metadata sources are rejected. Renames appear as missing/new names. Counts, sample records, descriptions, raw payloads, and timestamps do not produce structural changes. These are schema inspections, not backups or restore points.
+
 ## Connect a real FileMaker endpoint
 
 Use **Add real endpoint** or **Connections → Add connection**. Enter an HTTPS host only, the exact hosted database name, and a protocol. API paths are constructed by the connector.
@@ -51,12 +61,13 @@ Enter credentials locally in the app, never in chat. Authorization remains in lo
 
 ## Local storage and privacy
 
-IndexedDB database: `fm-api-explorer`, version 2.
+IndexedDB database: `fm-api-explorer`, version 3.
 
 | Store | Contents |
 | --- | --- |
 | profiles | Nonsecret name, host, database, protocol, version |
 | snapshots | Inspected schema, raw metadata, source/time, qualified counts, warnings; no record rows |
+| schemaVersions | Up to 50 dated structural inspections per connection; no rows, raw payloads, or record counts |
 | preferences | Active connection, favorites, compact rows, reduced motion |
 | activity | Last 200 connection/query events; no query literal values, passwords, or tokens |
 | requests | Saved read queries, filter values, expectations, and definition revisions |
@@ -88,9 +99,8 @@ Generated OpenAPI documents are read-operation snippets, not an entire API contr
 
 ## Possible future additions
 
-The next planned milestone is versioned schema snapshots and comparisons. See [roadmap.md](roadmap.md) for sequencing and acceptance criteria. Potential additions include:
+Versioned schema comparisons are available now. The next planned milestone is the integration and AI handoff package. See [roadmap.md](roadmap.md) for sequencing and acceptance criteria. Potential additions include:
 
-- Schema change reports showing added, removed, or changed fields and the saved integration checks they affect.
 - Portable integration and AI handoff bundles containing schema, TypeScript, API examples, developer notes, and check definitions.
 - Developer-authored business meanings, workflow notes, and agent constraints alongside observed metadata.
 - Verified MCP and OpenBridge adapters, with explicit permissions and reviewed tool definitions.
@@ -117,6 +127,7 @@ Tests exercise both local protocol flows, session ownership, guards, empty finds
 - `server/lab.ts`: synthetic native-shaped protocol endpoints.
 - `src/lib/workspace.tsx`: active profiles/sessions/schema, history, preferences.
 - `src/lib/storage.ts`: IndexedDB stores and migration.
+- `src/lib/schema-history.ts`: structural comparison, provenance, and potential saved-request impact.
 - `src/lib/queries.ts`: protocol-specific request compilation.
 - `src/lib/generators.ts`: integration artifacts from inspected metadata.
 - `src/components/`: workbench views, connection/auth dialogs, shadcn primitives.

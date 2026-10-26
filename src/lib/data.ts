@@ -56,6 +56,7 @@ export type Page =
   | 'developer'
   | 'ai'
   | 'requests'
+  | 'history'
 
 const field = (
   name: string,

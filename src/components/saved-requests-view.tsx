@@ -41,11 +41,13 @@ const statusLabel = {
 }
 export function SavedRequestsView({
   onOpenBuilder,
+  initialSearch = '',
 }: {
   onOpenBuilder: (request?: SavedRequest) => void
+  initialSearch?: string
 }) {
   const w = useWorkspace(),
-    [search, setSearch] = useState(''),
+    [search, setSearch] = useState(initialSearch),
     [running, setRunning] = useState<string | null>(null),
     [suite, setSuite] = useState(false),
     [editing, setEditing] = useState<SavedRequest | null>(null),
