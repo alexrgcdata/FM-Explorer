@@ -1,11 +1,9 @@
 import {
   ArrowRight,
-  Code2,
   GitBranch,
   History,
   Table2,
   ClipboardCheck,
-  Package,
 } from 'lucide-react'
 import type { Page } from '@/lib/data'
 import { useWorkspace } from '@/lib/workspace'
@@ -29,18 +27,6 @@ const shortcuts = [
     detail: 'Run saved read requests and expectations',
     icon: ClipboardCheck,
   },
-  {
-    page: 'query',
-    title: 'Build a query',
-    detail: 'Filter records and copy an API request',
-    icon: Code2,
-  },
-  {
-    page: 'handoff',
-    title: 'Prepare a handoff',
-    detail: 'Package schema, examples, and knowledge',
-    icon: Package,
-  },
 ] as const
 
 export function WorkspaceDashboard({
@@ -52,7 +38,6 @@ export function WorkspaceDashboard({
 }) {
   const w = useWorkspace()
   const { profile, entities, relationships, snapshot, session } = w
-  const counted = entities.filter((e) => typeof e.count === 'number')
   const stats = [
     {
       label:
@@ -70,13 +55,6 @@ export function WorkspaceDashboard({
       value: relationships.length,
       detail: 'Exposed evidence',
     },
-    {
-      label: 'Records reported',
-      value: counted.length
-        ? counted.reduce((sum, e) => sum + (e.count ?? 0), 0).toLocaleString()
-        : '—',
-      detail: `${counted.length} of ${entities.length} resources counted`,
-    },
   ]
   const nodes = entities.slice(0, 6).map((entity, index) => ({
     entity,
@@ -93,13 +71,9 @@ export function WorkspaceDashboard({
       <section className="dashboard-context" aria-label="Current database">
         <div>
           <span className="dashboard-kicker">
-            CURRENT DATABASE · {profile.protocol}
+            {profile.lab ? 'Synthetic local lab' : 'Connection status'} ·{' '}
+            {profile.protocol}
           </span>
-          <h2>{profile.database}</h2>
-          <p>
-            Explore the API-facing structure, check integration expectations,
-            and prepare a documented handoff.
-          </p>
         </div>
         <div className="dashboard-connection-facts">
           <span className={session ? 'dashboard-connected' : ''}>
@@ -114,11 +88,6 @@ export function WorkspaceDashboard({
             {snapshot
               ? `Inspected ${new Date(snapshot.inspectedAt).toLocaleString()}`
               : 'Awaiting discovery'}
-          </span>
-          <span>
-            {session
-              ? `${session.latencyMs} ms connection check`
-              : 'Reconnect for current records'}
           </span>
         </div>
       </section>
@@ -138,7 +107,7 @@ export function WorkspaceDashboard({
         <section className="dashboard-section dashboard-start">
           <div className="dashboard-section-heading">
             <h2>Start here</h2>
-            <span>Your developer workflow</span>
+            <span>Three ways to begin</span>
           </div>
           <div className="dashboard-shortcuts">
             {shortcuts.map((item) => (
@@ -221,32 +190,6 @@ export function WorkspaceDashboard({
           </p>
         </section>
       </div>
-      <section className="dashboard-section dashboard-resources">
-        <div className="dashboard-section-heading">
-          <h2>{profile.protocol === 'Data API' ? 'Layouts' : 'Entities'}</h2>
-          <span>{entities.length} accessible · select one to inspect</span>
-        </div>
-        <div className="dashboard-resource-list">
-          {entities.map((entity) => (
-            <button key={entity.name} onClick={() => onEntity(entity.name)}>
-              <Table2 size={18} />
-              <span>
-                <strong>{entity.name}</strong>
-                <small>{entity.description || 'No description supplied'}</small>
-              </span>
-              <span className="dashboard-resource-count">
-                {entity.fields.length} fields
-              </span>
-              <span className="dashboard-resource-count">
-                {typeof entity.count !== 'number'
-                  ? 'Count unknown'
-                  : `${entity.count.toLocaleString()} records`}
-              </span>
-              <ArrowRight size={16} />
-            </button>
-          ))}
-        </div>
-      </section>
       {snapshot && snapshot.warnings.length > 0 && (
         <details className="discovery-notes">
           <summary>

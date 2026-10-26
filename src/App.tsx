@@ -15,7 +15,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  ChevronsUpDown,
   CircleHelp,
   Code2,
   ClipboardCheck,
@@ -297,7 +296,22 @@ function Explorer() {
             }}
           >
             <span className="brand-mark">
-              <DatabaseZap size={23} strokeWidth={1.8} />
+              <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <path
+                  d="M13 7 3 20l10 13M27 7l10 13-10 13"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="m15 24 10-8"
+                  stroke="var(--purple)"
+                  strokeWidth="2.5"
+                />
+                <circle cx="15" cy="24" r="3" fill="var(--foreground)" />
+                <circle cx="25" cy="16" r="3" fill="var(--purple)" />
+              </svg>
             </span>
             <span>
               <strong>
@@ -306,27 +320,30 @@ function Explorer() {
               <small>API WORKBENCH</small>
             </span>
           </a>
+          <button
+            className="workbench-search"
+            aria-label="Search workspace"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search size={17} />
+            <span>Search entities & fields</span>
+            <kbd>Ctrl K</kbd>
+          </button>
           <div className="workbench-connection">
             {' '}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="connection-switch">
-                  <span className="connection-avatar">
-                    {profile.name[0]}
-                    <span className={!session ? 'offline-dot' : ''} />
-                  </span>
+                <button
+                  className="connection-switch"
+                  aria-label={`Connection: ${profile.name}`}
+                  title="Choose or manage a database connection"
+                >
+                  <Database size={17} className="connection-picker-icon" />
                   <span className="connection-label">
+                    <small>Connection</small>
                     <strong>{profile.name}</strong>
-                    <small>
-                      {profile.lab
-                        ? 'Local lab'
-                        : session
-                          ? 'Connected'
-                          : 'Saved profile'}{' '}
-                      · {profile.protocol}
-                    </small>
                   </span>
-                  <ChevronsUpDown size={13} />
+                  <ChevronDown size={13} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="connection-menu">
@@ -367,32 +384,7 @@ function Explorer() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <button
-            className="workbench-search"
-            aria-label="Search workspace"
-            onClick={() => setSearchOpen(true)}
-          >
-            <Search size={17} />
-            <span>Search entities & fields</span>
-            <kbd>Ctrl K</kbd>
-          </button>
-          <span className={`workbench-health ${session ? 'online' : ''}`}>
-            <span />
-            {session
-              ? profile.lab
-                ? 'Lab connected'
-                : 'Connected'
-              : snapshot
-                ? 'Saved schema'
-                : 'Disconnected'}
-          </span>
           <div className="workbench-utilities">
-            <IconButton
-              label="Connections"
-              onClick={() => setManagerOpen(true)}
-            >
-              <Database size={18} />
-            </IconButton>
             <IconButton
               label="Help & shortcuts"
               onClick={() => setHelpOpen(true)}
@@ -645,10 +637,14 @@ function Explorer() {
                   YOUR DEVELOPER WORKBENCH
                 </div>
                 <h1>
-                  {current.title}
+                  {page === 'overview' ? profile.database : current.title}
                   <span className="heading-dot">.</span>
                 </h1>
-                <p>{descriptions[page]}</p>
+                <p>
+                  {page === 'overview'
+                    ? `Database overview · ${profile.protocol}`
+                    : descriptions[page]}
+                </p>
               </div>
               <div className="heading-actions">
                 {snapshot && (
@@ -699,7 +695,7 @@ function Explorer() {
                 {w.storageError}
               </div>
             )}
-            {profile.lab && !isEntityPage(page) && (
+            {profile.lab && !isEntityPage(page) && page !== 'overview' && (
               <div className="source-banner">
                 <ShieldCheck size={14} />
                 <span>
@@ -920,7 +916,7 @@ function Explorer() {
                   : snapshot
                     ? 'Saved schema'
                     : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.6.1
+                <span className="footer-dot">·</span>v0.6.2
               </span>
             </footer>
           </main>

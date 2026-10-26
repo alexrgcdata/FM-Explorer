@@ -6346,40 +6346,40 @@ small {
   }
 }
 
-/* Alex's purple palette, with independent status colors. */
+/* Neutral surfaces, orange actions, restrained violet detail. */
 :root,
 .app-shell.restored-shell {
-  --background: #0b0911;
+  --background: #0d0e12;
   --foreground: #f8f7fc;
-  --surface-deep: #14111d;
-  --card: #1b1728;
+  --surface-deep: #15161d;
+  --card: #1b1d25;
   --card-foreground: #f8f7fc;
-  --popover: #1b1728;
+  --popover: #1b1d25;
   --popover-foreground: #f8f7fc;
-  --primary: #7c3aed;
-  --primary-foreground: #f8f7fc;
-  --secondary: #241e34;
+  --primary: #f3a547;
+  --primary-foreground: #21160c;
+  --secondary: #242631;
   --secondary-foreground: #f8f7fc;
-  --muted: #241e34;
-  --muted-foreground: #9d95b8;
-  --accent: #2d2044;
-  --accent-foreground: #a855f7;
+  --muted: #242631;
+  --muted-foreground: #a5a6b4;
+  --accent: #292632;
+  --accent-foreground: #f2ac60;
   --destructive: #ef4444;
-  --border: #332a46;
-  --input: #403451;
-  --ring: #a855f7;
-  --faint: #9d95b8;
-  --purple: #a855f7;
+  --border: #30323e;
+  --input: #40434f;
+  --ring: #f2ac60;
+  --faint: #a5a6b4;
+  --purple: #9f8cb8;
   --green: #22c55e;
   --warning: #f59e0b;
-  --hover: #241e34;
-  --sidebar: #14111d;
-  --amber-wash: #7c3aed12;
-  --amber-soft: #7c3aed12;
-  --amber-border: #7c3aed50;
-  --graph-edge: #7c3aed;
-  --graph-dot: #403451;
-  --graph-mask: #0b0911cc;
+  --hover: #242631;
+  --sidebar: #15161d;
+  --amber-wash: #f3a54712;
+  --amber-soft: #f3a54712;
+  --amber-border: #f3a54750;
+  --graph-edge: #f3a547;
+  --graph-dot: #40434f;
+  --graph-mask: #0d0e12cc;
   background-color: var(--background);
   color: var(--foreground);
 }
@@ -6480,7 +6480,7 @@ body {
   border-color: var(--accent-foreground);
   box-shadow:
     0 0 0 2px var(--amber-wash),
-    0 0 24px #a855f714;
+    0 0 24px #f2ac6014;
 }
 .restored-shell .graph-table-title > svg {
   color: var(--accent-foreground);
@@ -6534,4 +6534,178 @@ body {
 }
 .restored-shell .dashboard-connection-facts > .dashboard-connected:first-child {
   color: var(--green);
+}
+
+/* Compact connection control and quieter dashboard. */
+.restored-shell .brand-mark {
+  background: transparent;
+  color: var(--primary);
+  width: 38px;
+  height: 38px;
+}
+.restored-shell .brand-mark svg {
+  width: 38px;
+  height: 38px;
+}
+.restored-shell .brand small {
+  display: none;
+}
+.restored-shell .workbench-search {
+  max-width: 360px;
+  margin-left: 12px;
+}
+.restored-shell .workbench-connection {
+  margin-left: auto;
+  width: auto;
+  max-width: 230px;
+  flex-shrink: 1;
+}
+.restored-shell .connection-switch {
+  width: auto;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 4px 8px;
+  gap: 9px;
+  border-color: transparent;
+  background: transparent;
+}
+.restored-shell .connection-switch:hover {
+  background: var(--card);
+  border-color: var(--border);
+}
+.restored-shell .connection-label {
+  min-width: 0;
+}
+.restored-shell .connection-label strong {
+  max-width: 165px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+}
+.restored-shell .connection-label small {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin: 0 0 2px;
+}
+.restored-shell .connection-picker-icon {
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+}
+.restored-shell .workbench-utilities {
+  margin-left: 0;
+}
+.restored-shell .workbench-utilities > :first-child {
+  display: inline-flex;
+}
+.restored-shell .dashboard-context {
+  gap: 12px;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.restored-shell .dashboard-kicker {
+  color: var(--muted-foreground);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.restored-shell .dashboard-connection-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.restored-shell .dashboard-stat-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.restored-shell .dashboard-stat-strip > div {
+  padding: 14px 18px;
+}
+.restored-shell .dashboard-stat-strip small {
+  display: none;
+}
+.restored-shell .dashboard-work-grid {
+  align-items: start;
+}
+.restored-shell .dashboard-shortcuts > button {
+  padding: 16px 7px;
+}
+.restored-shell .dashboard-map svg path {
+  stroke: var(--purple);
+}
+.restored-shell .dashboard-map svg[role='group'] {
+  max-height: 260px;
+}
+.restored-shell .dashboard-map svg text {
+  font-size: 16px;
+}
+.restored-shell .workspace-dashboard {
+  gap: 18px;
+}
+@media (max-width: 900px) {
+  .restored-shell .workbench-primary-row {
+    gap: 12px;
+  }
+  .restored-shell .workbench-search {
+    max-width: 210px;
+    margin-left: 0;
+  }
+  .restored-shell .workbench-connection {
+    max-width: 195px;
+  }
+  .restored-shell .connection-label strong {
+    max-width: 135px;
+  }
+  .restored-shell .dashboard-stat-strip > div {
+    border-bottom: 0;
+  }
+  .restored-shell .dashboard-stat-strip > div:nth-child(2) {
+    border-right: 1px solid var(--border);
+  }
+}
+@media (max-width: 600px) {
+  .restored-shell .workbench-primary-row {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 10px 12px;
+    min-height: 66px;
+  }
+  .restored-shell .brand {
+    min-width: 0;
+    gap: 7px;
+  }
+  .restored-shell .brand strong {
+    font-size: 0.875rem;
+  }
+  .restored-shell .brand-mark,
+  .restored-shell .brand-mark svg {
+    width: 30px;
+    height: 30px;
+  }
+  .restored-shell .workbench-connection {
+    order: 0;
+    width: auto;
+    flex: 0 1 140px;
+    margin-left: auto;
+  }
+  .restored-shell .connection-switch {
+    padding: 3px;
+    gap: 6px;
+  }
+  .restored-shell .connection-label strong {
+    max-width: 95px;
+  }
+  .restored-shell .connection-label small {
+    display: none;
+  }
+  .restored-shell .workbench-utilities > :last-child {
+    display: none;
+  }
+  .restored-shell .dashboard-stat-strip > div {
+    padding: 12px;
+  }
+  .restored-shell .dashboard-stat-strip strong {
+    font-size: 1.625rem;
+  }
+  .restored-shell .dashboard-map svg text {
+    font-size: 18px;
+  }
 }
