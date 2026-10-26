@@ -213,7 +213,7 @@ export function buildHandoffFiles(input: HandoffInput): HandoffFiles {
   const manifest = {
     format: 'fm-api-explorer.handoff',
     version: 1,
-    appVersion: '0.6.2',
+    appVersion: '0.6.3',
     createdBy: 'FM API Explorer — Alex Seidler <alex@rgcdata.com>',
     exportedAt: new Date().toISOString(),
     inspection: {

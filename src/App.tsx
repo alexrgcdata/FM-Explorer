@@ -916,7 +916,7 @@ function Explorer() {
                   : snapshot
                     ? 'Saved schema'
                     : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.6.2
+                <span className="footer-dot">·</span>v0.6.3
               </span>
             </footer>
           </main>

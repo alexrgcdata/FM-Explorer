@@ -1,31 +1,22 @@
-import {
-  ArrowRight,
-  GitBranch,
-  History,
-  Table2,
-  ClipboardCheck,
-} from 'lucide-react'
+import { ArrowRight, GitBranch } from 'lucide-react'
 import type { Page } from '@/lib/data'
 import { useWorkspace } from '@/lib/workspace'
 
 const shortcuts = [
   {
     page: 'schema',
-    title: 'Explore schema',
-    detail: 'Inspect fields, types, and records',
-    icon: Table2,
+    title: 'Explore fields & types',
+    detail: 'Start with the structure of a resource.',
   },
   {
-    page: 'history',
-    title: 'Review changes',
-    detail: 'Compare saved schema inspections',
-    icon: History,
+    page: 'records',
+    title: 'Browse the records',
+    detail: 'Connect to see current values and search the data.',
   },
   {
-    page: 'requests',
-    title: 'Check integrations',
-    detail: 'Run saved read requests and expectations',
-    icon: ClipboardCheck,
+    page: 'relationships',
+    title: 'Follow relationships',
+    detail: 'See the connections exposed by this API.',
   },
 ] as const
 
@@ -105,14 +96,19 @@ export function WorkspaceDashboard({
       </section>
       <div className="dashboard-work-grid">
         <section className="dashboard-section dashboard-start">
-          <div className="dashboard-section-heading">
-            <h2>Start here</h2>
-            <span>Three ways to begin</span>
+          <div className="dashboard-guide-heading">
+            <span className="dashboard-guide-eyebrow">START HERE</span>
+            <h2>Get to know this database</h2>
+            <p>Structure first. Then the records and how they connect.</p>
           </div>
           <div className="dashboard-shortcuts">
-            {shortcuts.map((item) => (
-              <button key={item.page} onClick={() => onNavigate(item.page)}>
-                <item.icon size={19} />
+            {shortcuts.map((item, index) => (
+              <button
+                key={item.page}
+                className={index === 0 ? 'suggested-first-step' : ''}
+                onClick={() => onNavigate(item.page)}
+              >
+                <span className="dashboard-step-number">{index + 1}</span>
                 <span>
                   <strong>{item.title}</strong>
                   <small>{item.detail}</small>
@@ -121,6 +117,15 @@ export function WorkspaceDashboard({
               </button>
             ))}
           </div>
+          <details className="dashboard-sql-guide">
+            <summary>Coming from MySQL?</summary>
+            <p>
+              Fields are columns; records are rows. The FileMaker Data API
+              exposes layouts—views onto a solution, rather than a complete
+              table inventory. OData exposes entity sets. Start by choosing a
+              resource, then inspect its fields.
+            </p>
+          </details>
         </section>
         <section className="dashboard-section dashboard-map">
           <div className="dashboard-section-heading">

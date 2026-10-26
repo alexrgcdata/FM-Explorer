@@ -167,7 +167,7 @@ export async function buildServer(
     })
     return {
       workspaceToken: token,
-      version: '0.6.2',
+      version: '0.6.3',
       storage: 'IndexedDB',
       readOnly: true,
     }

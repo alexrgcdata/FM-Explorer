@@ -6709,3 +6709,104 @@ body {
     font-size: 18px;
   }
 }
+
+/* A quiet violet header and one clear starting point. */
+.restored-shell {
+  --guide-surface: #282131;
+  --guide-border: #795a45;
+  --header-violet: #1c1726;
+}
+.restored-shell .workbench-header {
+  background: var(--header-violet);
+}
+.restored-shell .workbench-nav-row {
+  background: linear-gradient(
+    90deg,
+    var(--header-violet),
+    var(--surface-deep) 80%
+  );
+}
+.restored-shell .dashboard-start {
+  background: linear-gradient(135deg, var(--guide-surface), var(--card) 85%);
+  border: 1px solid var(--guide-border);
+  box-shadow:
+    0 0 0 1px var(--amber-wash),
+    0 12px 32px #00000024;
+}
+.dashboard-guide-heading {
+  padding: 22px 22px 16px;
+}
+.dashboard-guide-eyebrow {
+  font-size: 0.875rem;
+  color: var(--accent-foreground);
+  letter-spacing: 0.09em;
+  font-weight: 650;
+}
+.dashboard-guide-heading h2 {
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  color: var(--foreground);
+  margin: 8px 0;
+}
+.dashboard-guide-heading p {
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+.restored-shell .dashboard-start .dashboard-shortcuts {
+  padding: 0 14px 4px;
+}
+.restored-shell .dashboard-start .dashboard-shortcuts > button {
+  padding: 15px 10px;
+  gap: 12px;
+  border-bottom: 0;
+  border-radius: 5px;
+  margin-bottom: 6px;
+}
+.restored-shell
+  .dashboard-start
+  .dashboard-shortcuts
+  > button.suggested-first-step {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 3px 12px #00000020;
+}
+.restored-shell .dashboard-start .suggested-first-step small,
+.restored-shell .dashboard-start .suggested-first-step > svg:last-child {
+  color: var(--primary-foreground);
+}
+.restored-shell .dashboard-start .suggested-first-step:hover {
+  filter: brightness(1.07);
+}
+.dashboard-step-number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--muted-foreground);
+}
+.suggested-first-step .dashboard-step-number {
+  border-color: currentColor;
+  color: inherit;
+}
+.dashboard-sql-guide {
+  padding: 12px 22px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+.dashboard-sql-guide summary {
+  color: var(--foreground);
+  cursor: pointer;
+}
+.dashboard-sql-guide p {
+  line-height: 1.8;
+  color: var(--muted-foreground);
+  margin-top: 10px;
+}
