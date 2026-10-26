@@ -22,7 +22,7 @@ The current release is an early local workbench validated against synthetic ODat
 
 Run `npm run build:website`, then upload the **contents** of `website-upload/` into a dedicated public folder on your own site, such as `public_html/fm-explorer/`. Open `https://your-domain/fm-explorer/`. Assets and fonts use relative paths, so a subfolder works without rewrites. Keep `index.html`, `favicon.svg`, `THIRD-PARTY-NOTICES.txt`, and the entire `assets/` directory together. See [FTP-INSTRUCTIONS.txt](FTP-INSTRUCTIONS.txt).
 
-This separate browser-only build automatically loads synthetic fixtures. It uses no Node/PHP service, accepts no real database authentication, and makes no external database or AI requests. IndexedDB uses the separate `fm-api-explorer-showcase` database. Saved queries/notes belong to each visitor's browser. The preview banner and response notes distinguish simulated operations from real FileMaker reads. It demonstrates the interface, local filtering, exports, and workflows; it does not validate a real FileMaker connection. Keep the normal local build for real endpoint testing.
+This separate browser-only build automatically loads synthetic fixtures. It uses no Node/PHP service, accepts no real database authentication, and makes no external database or AI requests. IndexedDB uses the separate `fm-api-explorer-showcase` database. Saved queries/notes belong to each visitor's browser. Response notes, synthetic-data labels, and the browser-preview footer distinguish simulated operations from real FileMaker reads. It demonstrates the interface, local filtering, exports, and workflows; it does not validate a real FileMaker connection. Keep the normal local build for real endpoint testing.
 
 ### Local connected application
 
@@ -133,6 +133,10 @@ Data API resources are layouts, not a complete base-table inventory. It does not
 Counts are shown only when returned by a server read, with coverage indicated. Decimal and unsafe integer JSON values are preserved as strings. Missing nullability/index/uniqueness remains unknown. Discovery is bounded to 250 resources and a metadata time budget; partial responses include warnings. OData inherited types currently produce a partial-schema warning rather than silently claiming complete inherited fields.
 
 Generated OpenAPI documents are read-operation snippets, not an entire API contract. MCP output defines tools; a runnable MCP server is not implemented. OpenBridge connection support needs an agreed endpoint/auth/schema contract. No arbitrary request proxy, SQL runner, schema edits, record writes, or FileMaker scripts are provided.
+
+## Hosted backend preference
+
+Alex prefers PostgreSQL for a future hosted backend. Confirm PostgreSQL access and the supported application runtime on the exact Namecheap plan before implementing deployment. The current FTP preview needs no backend or database.
 
 ## Possible future additions
 

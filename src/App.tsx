@@ -287,15 +287,6 @@ function Explorer() {
         Skip to workspace
       </a>
       <header className="workbench-header" ref={headerRef}>
-        {publicPreview && (
-          <div className="public-preview-strip">
-            <strong>Interactive preview</strong>
-            <span>
-              Synthetic data · runs in your browser · real database connections
-              require the local app.
-            </span>
-          </div>
-        )}
         <div className="workbench-primary-row">
           <a
             className="brand"
