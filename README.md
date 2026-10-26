@@ -171,6 +171,12 @@ Contact: [alex@rgcdata.com](mailto:alex@rgcdata.com)
 
 Copyright © 2026 Alex Seidler.
 
+## Workspace navigation and welcome
+
+The first header row contains the product, connection switcher, search, and utilities. The amber-accented second row switches work areas. The left rail is dedicated to resources, with a saved collapse preference; on smaller screens, Resources opens a drawer. Fields, Records, and Relationships remain available as tabs for the selected resource. Database-wide statistics are on Overview.
+
+A dismissible welcome screen credits **Alex Seidler / RGC Data Solutions**, linking to [rgcdata.com](https://rgcdata.com/) for custom FileMaker ↔ web ↔ mobile integrations, hosting, and complex development projects. Its optional five-step guide links to the relevant screens. X, Escape, or Explore workspace closes it. **Don't show this on startup** is saved locally in IndexedDB. **Help & shortcuts → Welcome & quick start** reopens it. The guide does not connect, execute a query, or open the external site automatically.
+
 ## Readability
 
 The interface uses a 16px-equivalent body size, 14px-equivalent minimum supporting text, larger controls, and brighter secondary text while retaining the charcoal/amber palette. Font sizes use rem units so browser text preferences and zoom remain useful. Data tables and code panels scroll within their own containers when needed. Relationship graphs can be zoomed and panned.

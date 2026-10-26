@@ -5,7 +5,6 @@ import {
   ArrowLeftRight,
   Star,
   Info,
-  Braces,
   Check,
   ChevronRight,
   Code2,
@@ -50,7 +49,7 @@ export function SchemaView({
   isFavorite: boolean
   onFavorite: () => void
 }) {
-  const { relationships, profile, snapshot } = useWorkspace()
+  const { profile, snapshot } = useWorkspace()
   const [search, setSearch] = useState('')
   const [compareOpen, setCompareOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -69,9 +68,6 @@ export function SchemaView({
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name),
     )
-  const links = relationships.filter(
-    (r) => r.source === entity.name || r.target === entity.name,
-  )
   const endpoint = entity.endpoint ?? 'Endpoint unavailable'
   if (!selected)
     return (
@@ -121,20 +117,6 @@ export function SchemaView({
             Browse records <ArrowUpRight size={14} />
           </Button>
         </div>
-      </div>
-      <div className="entity-tabs">
-        <button className="active">
-          <Table2 size={14} />
-          Fields <span>{entity.fields.length}</span>
-        </button>
-        <button onClick={onRecords}>
-          <Braces size={14} />
-          Records <span>{entity.count ?? '—'}</span>
-        </button>
-        <button onClick={onRelationships}>
-          <Link2 size={14} />
-          Relationships <span>{links.length}</span>
-        </button>
       </div>
       <CompareDialog
         entity={entity}

@@ -45,6 +45,8 @@ function useWorkspaceState() {
     [checkRuns, setCheckRuns] = useState<CheckRun[]>([])
   const [schemaVersions, setSchemaVersions] = useState<SchemaVersion[]>([])
   const [knowledgeNotes, setKnowledgeNotes] = useState<KnowledgeNote[]>([])
+  const [welcomeHidden, setWelcomeHiddenState] = useState(false)
+  const [resourceRailCollapsed, setResourceRailCollapsedState] = useState(false)
   const mounted = useRef(true),
     connecting = useRef(false)
   const profile = profiles.find((p) => p.id === activeId) ?? profiles[0],
@@ -112,6 +114,12 @@ function useWorkspaceState() {
         setKnowledgeNotes(notes)
         setCompactState(await storage.preference('compact', false))
         setMotionState(await storage.preference('reduced-motion', false))
+        setWelcomeHiddenState(
+          await storage.preference('welcome-hidden-v1', false),
+        )
+        setResourceRailCollapsedState(
+          await storage.preference('resource-rail-collapsed', false),
+        )
         await bootstrap()
         const found = await api.sessions()
         if (!cancelled)
@@ -421,6 +429,14 @@ function useWorkspaceState() {
     setMotionState(value)
     await persist(storage.setPreference('reduced-motion', value))
   }
+  async function setWelcomeHidden(value: boolean) {
+    setWelcomeHiddenState(value)
+    await persist(storage.setPreference('welcome-hidden-v1', value))
+  }
+  async function setResourceRailCollapsed(value: boolean) {
+    setResourceRailCollapsedState(value)
+    await persist(storage.setPreference('resource-rail-collapsed', value))
+  }
   function inspectRows(
     entityName: string,
     rows: Entity['rows'],
@@ -496,6 +512,10 @@ function useWorkspaceState() {
     toggleFavorite,
     setCompact,
     setReducedMotion,
+    welcomeHidden,
+    setWelcomeHidden,
+    resourceRailCollapsed,
+    setResourceRailCollapsed,
     inspectRows,
     forgetSnapshots,
     savedRequests: savedRequests.filter((r) => r.profileId === profile.id),
