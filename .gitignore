@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.local/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+
+# Local planning, agent conversations, and private workspace artifacts
+agentic-conversation/
+offline/
+blueprint.md
