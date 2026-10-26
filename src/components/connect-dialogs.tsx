@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from './ui/dialog'
 import { Choice } from './shared'
+import { publicPreview } from '@/lib/runtime'
 
 export function ConnectionDialog({
   open,
@@ -82,6 +83,26 @@ export function ConnectionDialog({
       setSaving(false)
     }
   }
+  if (publicPreview)
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Try the bundled database</DialogTitle>
+            <DialogDescription>
+              This public preview runs entirely in your browser with synthetic
+              data. It does not accept real FileMaker credentials or connect to
+              external servers. Use the Connection menu to switch between the
+              bundled API examples. Real connections require the local
+              application.
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => onOpenChange(false)}>
+            Continue exploring
+          </Button>
+        </DialogContent>
+      </Dialog>
+    )
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -269,8 +290,9 @@ export function AuthenticationDialog({
             <div className="info-banner">
               <ShieldCheck size={16} />
               <p>
-                The lab issues a temporary local token and serves synthetic
-                records. No real FileMaker account is needed.
+                {publicPreview
+                  ? 'This loads synthetic records in your browser. No server, credentials, or real FileMaker account is involved.'
+                  : 'The lab issues a temporary local token and serves synthetic records. No real FileMaker account is needed.'}
               </p>
             </div>
           ) : (

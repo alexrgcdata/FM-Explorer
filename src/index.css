@@ -6810,3 +6810,20 @@ body {
   color: var(--muted-foreground);
   margin-top: 10px;
 }
+
+.public-preview-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  padding: 9px 16px;
+  background: var(--amber-wash);
+  border-bottom: 1px solid var(--amber-border);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+.public-preview-strip strong {
+  color: var(--accent-foreground);
+  font-weight: 600;
+}

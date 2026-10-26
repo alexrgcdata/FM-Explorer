@@ -18,6 +18,7 @@ import {
   type Snapshot,
 } from './contracts'
 import { api, bootstrap, ClientError } from './api'
+import { publicPreview } from './runtime'
 import * as storage from './storage'
 import type { SchemaVersion } from './schema-history'
 import type { KnowledgeNote } from './knowledge'
@@ -122,6 +123,20 @@ function useWorkspaceState() {
         )
         await bootstrap()
         const found = await api.sessions()
+        if (publicPreview) {
+          const previews = await Promise.all(
+            found.sessions.map(async (s) => (await api.refresh(s.id)).snapshot),
+          )
+          if (!cancelled)
+            setSnapshots(
+              Object.fromEntries(previews.map((s) => [s.profileId, s])),
+            )
+          for (const preview of previews)
+            await captureSchema(
+              preview,
+              labProfiles.find((p) => p.id === preview.profileId),
+            )
+        }
         if (!cancelled)
           setSessions(
             Object.fromEntries(found.sessions.map((s) => [s.profileId, s])),

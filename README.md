@@ -18,6 +18,14 @@ The current release is an early local workbench validated against synthetic ODat
 
 ## Start
 
+### Website preview by FTP
+
+Run `npm run build:website`, then upload the **contents** of `website-upload/` into a dedicated public folder on your own site, such as `public_html/fm-explorer/`. Open `https://your-domain/fm-explorer/`. Assets and fonts use relative paths, so a subfolder works without rewrites. Keep `index.html`, `favicon.svg`, `THIRD-PARTY-NOTICES.txt`, and the entire `assets/` directory together. See [FTP-INSTRUCTIONS.txt](FTP-INSTRUCTIONS.txt).
+
+This separate browser-only build automatically loads synthetic fixtures. It uses no Node/PHP service, accepts no real database authentication, and makes no external database or AI requests. IndexedDB uses the separate `fm-api-explorer-showcase` database. Saved queries/notes belong to each visitor's browser. The preview banner and response notes distinguish simulated operations from real FileMaker reads. It demonstrates the interface, local filtering, exports, and workflows; it does not validate a real FileMaker connection. Keep the normal local build for real endpoint testing.
+
+### Local connected application
+
 Requires Node.js 24 or newer. Open `Start FM API Explorer.cmd`, or run:
 
 ```powershell

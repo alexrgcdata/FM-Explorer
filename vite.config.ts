@@ -3,7 +3,9 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'node:url'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: mode === 'showcase' ? './' : '/',
+  build: { outDir: mode === 'showcase' ? 'website-upload' : 'dist' },
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: {
@@ -12,4 +14,4 @@ export default defineConfig({
     strictPort: true,
     proxy: { '/api': { target: 'http://127.0.0.1:4186', changeOrigin: true } },
   },
-})
+}))

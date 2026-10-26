@@ -1,3 +1,4 @@
+import { publicPreview } from '@/lib/runtime'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   flexRender,
@@ -498,8 +499,9 @@ export function RecordsView({
         </section>
       )}
       <p className="subtle-note">
-        Search sends a contains filter for the selected text field. Counts are
-        server-reported when available. Export saves only the returned page.
+        {publicPreview
+          ? 'Search filters synthetic records in this browser. Export saves only the current page.'
+          : 'Search sends a contains filter for the selected text field. Counts are server-reported when available. Export saves only the returned page.'}
       </p>
       {result?.warnings.map((warning, i) => (
         <p className="subtle-note" key={i}>
@@ -522,7 +524,7 @@ export function RecordsView({
             code={JSON.stringify(
               selected?.meta
                 ? { fieldData: selected.row, ...(selected.meta as object) }
-                : selected?.row ?? {},
+                : (selected?.row ?? {}),
               null,
               2,
             )}

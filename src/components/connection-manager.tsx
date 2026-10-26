@@ -1,3 +1,4 @@
+import { publicPreview } from '@/lib/runtime'
 import {
   ArrowRight,
   Braces,
@@ -55,8 +56,9 @@ export function ConnectionManager({
             Connection manager
           </DialogTitle>
           <DialogDescription>
-            Profiles and schema snapshots in IndexedDB. Authorization held in
-            service memory.
+            {publicPreview
+              ? 'Synthetic preview profiles and schema snapshots in IndexedDB. No real authentication or external database connection.'
+              : 'Profiles and schema snapshots in IndexedDB. Authorization held in service memory.'}
           </DialogDescription>
         </DialogHeader>
         <div className="manager-heading">

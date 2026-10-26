@@ -78,6 +78,7 @@ import {
 } from './components/resource-workspace'
 import { SchemaHistoryView } from './components/schema-history-view'
 import { WelcomeDialog } from './components/welcome-dialog'
+import { publicPreview } from './lib/runtime'
 import type { SavedRequest } from './lib/saved-requests'
 import {
   ConnectionDialog,
@@ -286,6 +287,15 @@ function Explorer() {
         Skip to workspace
       </a>
       <header className="workbench-header" ref={headerRef}>
+        {publicPreview && (
+          <div className="public-preview-strip">
+            <strong>Interactive preview</strong>
+            <span>
+              Synthetic data · runs in your browser · real database connections
+              require the local app.
+            </span>
+          </div>
+        )}
         <div className="workbench-primary-row">
           <a
             className="brand"
@@ -911,12 +921,14 @@ function Explorer() {
               </span>
               <span>
                 <Activity size={12} />
-                {session
-                  ? `${session.latencyMs} ms connection check`
-                  : snapshot
-                    ? 'Saved schema'
-                    : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.6.3
+                {publicPreview
+                  ? 'Browser-only preview'
+                  : session
+                    ? `${session.latencyMs} ms connection check`
+                    : snapshot
+                      ? 'Saved schema'
+                      : 'Ready to connect'}
+                <span className="footer-dot">·</span>v0.7.0
               </span>
             </footer>
           </main>

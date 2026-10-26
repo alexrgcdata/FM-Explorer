@@ -1,5 +1,6 @@
 node_modules/
 dist/
+website-upload/
 coverage/
 .local/
 .env

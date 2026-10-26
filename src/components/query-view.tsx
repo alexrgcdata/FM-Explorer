@@ -1,3 +1,4 @@
+import { publicPreview } from '@/lib/runtime'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRight,
@@ -374,8 +375,10 @@ export function QueryView({
             <ArrowRight size={14} />
             <p>
               Built from the {protocol === 'Data API' ? 'layout' : 'entity set'}{' '}
-              you selected. Run query sends this request through the local
-              service.
+              you selected.{' '}
+              {publicPreview
+                ? 'Run query evaluates the bundled synthetic records in this browser.'
+                : 'Run query sends this request through the local service.'}
             </p>
           </div>
         </section>

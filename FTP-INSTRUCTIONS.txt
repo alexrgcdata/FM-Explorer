@@ -1,0 +1,59 @@
+FM API Explorer — website preview
+Created by Alex Seidler / RGC Data Solutions
+
+BUILD FOLDER
+C:\Users\agsei\Desktop\Personal Projects\FM API Explorer\website-upload
+
+WHAT TO FTP
+Upload ALL CONTENTS of website-upload:
+  index.html
+  favicon.svg
+  THIRD-PARTY-NOTICES.txt
+  assets/ (the entire folder, including fonts and every JS/CSS file)
+
+WHERE TO PUT THEM
+1. Connect to your own website with your FTP/SFTP program.
+2. Open its public web folder (often public_html, www, or htdocs).
+3. Create a folder called fm-explorer inside that public web folder.
+4. Upload the four items above INSIDE fm-explorer.
+5. Open https://YOUR-DOMAIN/fm-explorer/ with the trailing slash.
+
+Example final server layout:
+  public_html/
+    fm-explorer/
+      index.html
+      favicon.svg
+      THIRD-PARTY-NOTICES.txt
+      assets/
+
+Do not upload the whole project or nest website-upload inside fm-explorer.
+Do not replace your website's existing root index file.
+No node_modules, server, src, .git, .env, or credentials are needed.
+No PHP, Node, database, npm, or server API is required for this preview.
+Use HTTPS: browser storage and secure browser features require it.
+
+WHAT VISITORS CAN TRY
+The synthetic database loads automatically. Explore fields, relationships,
+records, filters, sorting, pagination, query examples, saved checks,
+schema history, code generation, and handoff exports.
+Their workspace is stored in their own browser using IndexedDB.
+
+This is a browser-only interactive preview. It does NOT accept real database
+credentials or make real FileMaker connections. It does not contact an AI service.
+Real Data API/OData connectors remain in the local Node application, with
+real FileMaker Server/Cloud acceptance still pending.
+
+IF THE PAGE DOES NOT LOAD
+- Check that index.html is directly inside the fm-explorer folder.
+- Check that assets is beside index.html and fully uploaded.
+- Open the folder URL with a trailing slash, not the index file on your PC.
+- Use HTTPS, then refresh the browser with Ctrl+F5.
+- If this folder has an old .htaccess file from an earlier upload, check it
+  with your host. This build does not require a rewrite configuration.
+
+REBUILD AFTER SOURCE CHANGES
+From the project folder: npm run build:website
+Then upload the new website-upload contents again, including all assets.
+The normal npm run build output in dist is the LOCAL SERVICE build, not this one.
+
+Nothing was uploaded to any website by this task.

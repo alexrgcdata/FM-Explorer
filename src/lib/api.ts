@@ -6,6 +6,7 @@ import type {
   Snapshot,
 } from './contracts'
 import type { Profile } from './data'
+import { publicPreview } from './runtime'
 let workspaceToken = ''
 export class ClientError extends Error {
   constructor(
@@ -16,6 +17,7 @@ export class ClientError extends Error {
   }
 }
 export async function bootstrap() {
+  if (publicPreview) return
   const response = await fetch('/api/bootstrap', { credentials: 'same-origin' })
   if (!response.ok)
     throw new Error(
@@ -32,6 +34,12 @@ async function request<T>(
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
+  if (publicPreview) {
+    if (signal?.aborted)
+      throw new DOMException('Request cancelled.', 'AbortError')
+    const { previewRequest } = await import('./showcase')
+    return previewRequest<T>(path, method, body)
+  }
   const response = await fetch(`/api${path}`, {
     method,
     credentials: 'same-origin',

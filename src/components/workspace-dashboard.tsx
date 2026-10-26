@@ -1,6 +1,7 @@
 import { ArrowRight, GitBranch } from 'lucide-react'
 import type { Page } from '@/lib/data'
 import { useWorkspace } from '@/lib/workspace'
+import { publicPreview } from '@/lib/runtime'
 
 const shortcuts = [
   {
@@ -70,9 +71,11 @@ export function WorkspaceDashboard({
           <span className={session ? 'dashboard-connected' : ''}>
             <i />
             {session
-              ? profile.lab
-                ? 'Local lab connected'
-                : 'Connected'
+              ? publicPreview
+                ? 'Preview ready'
+                : profile.lab
+                  ? 'Local lab connected'
+                  : 'Connected'
               : 'Saved inspection'}
           </span>
           <span>

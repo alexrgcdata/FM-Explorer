@@ -1,4 +1,5 @@
 import { openDB, type DBSchema } from 'idb'
+import { publicPreview } from './runtime'
 import type { Profile } from './data'
 import type { ActivityEntry, Snapshot } from './contracts'
 import { makeSchemaVersion, type SchemaVersion } from './schema-history'
@@ -39,48 +40,54 @@ interface ExplorerDB extends DBSchema {
     indexes: { 'by-time': string }
   }
 }
-export const database = openDB<ExplorerDB>('fm-api-explorer', 4, {
-  upgrade(db, oldVersion, _newVersion, transaction) {
-    if (oldVersion < 4)
-      db.createObjectStore('knowledgeNotes', { keyPath: 'id' }).createIndex(
-        'by-profile',
-        'profileId',
-      )
-    if (oldVersion < 1) {
-      db.createObjectStore('profiles', { keyPath: 'id' })
-      db.createObjectStore('snapshots', { keyPath: 'profileId' })
-      db.createObjectStore('preferences')
-      db.createObjectStore('activity', { keyPath: 'id' }).createIndex(
-        'by-time',
-        'at',
-      )
-    }
-    if (oldVersion < 2) {
-      db.createObjectStore('requests', { keyPath: 'id' }).createIndex(
-        'by-profile',
-        'profileId',
-      )
-      const runs = db.createObjectStore('checkRuns', { keyPath: 'id' })
-      runs.createIndex('by-request', 'requestId')
-      runs.createIndex('by-time', 'at')
-    }
-    if (oldVersion < 3) {
-      const versions = db.createObjectStore('schemaVersions', { keyPath: 'id' })
-      versions.createIndex('by-profile', 'profileId')
-      const request = transaction.objectStore('snapshots').openCursor()
-      void request.then(async function migrate(cursor) {
-        if (!cursor) return
-        await versions.put(makeSchemaVersion(cursor.value))
-        await migrate(await cursor.continue())
-      })
-    }
+export const database = openDB<ExplorerDB>(
+  publicPreview ? 'fm-api-explorer-showcase' : 'fm-api-explorer',
+  4,
+  {
+    upgrade(db, oldVersion, _newVersion, transaction) {
+      if (oldVersion < 4)
+        db.createObjectStore('knowledgeNotes', { keyPath: 'id' }).createIndex(
+          'by-profile',
+          'profileId',
+        )
+      if (oldVersion < 1) {
+        db.createObjectStore('profiles', { keyPath: 'id' })
+        db.createObjectStore('snapshots', { keyPath: 'profileId' })
+        db.createObjectStore('preferences')
+        db.createObjectStore('activity', { keyPath: 'id' }).createIndex(
+          'by-time',
+          'at',
+        )
+      }
+      if (oldVersion < 2) {
+        db.createObjectStore('requests', { keyPath: 'id' }).createIndex(
+          'by-profile',
+          'profileId',
+        )
+        const runs = db.createObjectStore('checkRuns', { keyPath: 'id' })
+        runs.createIndex('by-request', 'requestId')
+        runs.createIndex('by-time', 'at')
+      }
+      if (oldVersion < 3) {
+        const versions = db.createObjectStore('schemaVersions', {
+          keyPath: 'id',
+        })
+        versions.createIndex('by-profile', 'profileId')
+        const request = transaction.objectStore('snapshots').openCursor()
+        void request.then(async function migrate(cursor) {
+          if (!cursor) return
+          await versions.put(makeSchemaVersion(cursor.value))
+          await migrate(await cursor.continue())
+        })
+      }
+    },
+    blocking(_current, _next, event) {
+      const target = event.target
+      if (target && 'close' in target && typeof target.close === 'function')
+        target.close()
+    },
   },
-  blocking(_current, _next, event) {
-    const target = event.target
-    if (target && 'close' in target && typeof target.close === 'function')
-      target.close()
-  },
-})
+)
 export async function saveProfile(profile: Profile) {
   const safe: Profile = {
     id: profile.id,
@@ -251,6 +258,7 @@ export async function getActivity() {
   ).reverse()
 }
 export async function migrateLegacy() {
+  if (publicPreview) return
   const db = await database
   if (await db.get('preferences', 'legacy-migrated')) return
   try {
