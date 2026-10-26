@@ -181,9 +181,9 @@ export default function RelationshipView({
       style: {
         stroke: active ? 'var(--primary)' : 'var(--graph-edge)',
         strokeWidth: active && path ? 2 : 1.4,
-        opacity: active ? 0.8 : 0.2,
+        opacity: active ? 0.9 : 0.5,
       },
-      labelStyle: { fill: 'var(--muted-foreground)', fontSize: 10 },
+      labelStyle: { fill: 'var(--muted-foreground)', fontSize: 14 },
       labelBgStyle: { fill: 'var(--background)' },
       markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--primary)' },
     }

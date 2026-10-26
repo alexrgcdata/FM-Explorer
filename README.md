@@ -6,6 +6,16 @@ React/TypeScript developer workbench with charcoal/amber styling, shadcn/Tailwin
 
 FM API Explorer helps FileMaker developers, web developers, and AI/MCP builders understand the API-facing structure of a solution, explore records, test integration expectations, and generate useful documentation and code artifacts.
 
+## Why use it?
+
+**Understand your FileMaker API. Review changes. Hand off with confidence.**
+
+FM API Explorer is an integration workbench for FileMaker consultants, web developers, and developers preparing context for agents. Inspect what a connection exposes, save representative read requests and expectations, compare dated schema inspections, and hand another developer a portable package with schema, types, API examples, and reviewed notes.
+
+For example, a website expects an Email field. After a solution update, compare the API-visible schema, review the saved requests referencing Email, and rerun their checks. Package the inspected structure and developer-confirmed meanings for the person maintaining that website. The intended benefit is less repeated discovery, testing, and handoff preparation; time savings and customer demand still need real-solution trials.
+
+The current release is an early local workbench validated against synthetic OData/Data API labs. Real FileMaker Server/Cloud acceptance is pending. Schema history documents changes and cannot restore a database. A handoff package provides context and read scaffolding; it does not establish that an agent understands every business rule.
+
 ## Start
 
 Requires Node.js 24 or newer. Open `Start FM API Explorer.cmd`, or run:
@@ -160,3 +170,7 @@ Tests exercise both local protocol flows, session ownership, guards, empty finds
 Contact: [alex@rgcdata.com](mailto:alex@rgcdata.com)
 
 Copyright © 2026 Alex Seidler.
+
+## Readability
+
+The interface uses a 16px-equivalent body size, 14px-equivalent minimum supporting text, larger controls, and brighter secondary text while retaining the charcoal/amber palette. Font sizes use rem units so browser text preferences and zoom remain useful. Data tables and code panels scroll within their own containers when needed. Relationship graphs can be zoomed and panned.
