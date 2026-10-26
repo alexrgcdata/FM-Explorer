@@ -6827,3 +6827,49 @@ body {
   color: var(--accent-foreground);
   font-weight: 600;
 }
+
+.connection-prep-guide {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-deep);
+  font-size: 0.875rem;
+}
+.connection-prep-guide summary {
+  cursor: pointer;
+  color: var(--accent-foreground);
+  font-weight: 550;
+}
+.connection-prep-guide p {
+  color: var(--muted-foreground);
+  line-height: 1.7;
+  margin: 10px 0;
+}
+.connection-url-helper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+.connection-url-helper > span {
+  flex: 1;
+}
+.connection-url-helper > button {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .connection-url-helper {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .connection-form .dialog-actions {
+    flex-wrap: wrap;
+  }
+}
+
+.connection-setup-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}

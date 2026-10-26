@@ -6,6 +6,16 @@ Product job: help a developer inherit a FileMaker solution, understand its integ
 
 The current application is a local workbench with IndexedDB, read-only Data API/OData connectors, and a synthetic protocol lab. A schema snapshot describes what was inspected; it cannot restore a FileMaker database or deleted data.
 
+## Current local sequence
+
+1. **Prepare a real connection.** Paste a server/API URL, recognize its host/database/protocol, and save a profile without credentials if needed. Copy a setup request for the solution owner. These actions do not test connectivity or contact the server.
+2. **Run one approved real-solution trial.** Enter credentials locally, inspect account-visible metadata, browse a bounded page, and check pagination, filters, and one numeric/date field. Record the actual server version and protocol tested; leave other compatibility combinations unverified.
+3. **Prove the integration workflow.** Save a schema baseline and one representative read check. Review a controlled change, then export a handoff another developer can use. Record whether this catches a problem or saves work.
+4. **Refine from pilot feedback.** Observe whether FileMaker and SQL/web developers can find fields, records, and a useful export without coaching. Improve the specific stumbling points before adding more tools.
+5. **Choose a hosted backend only when needed.** PostgreSQL is Alex's preference. Verify the exact Namecheap plan's database access and supported application runtime first. The public FTP preview remains separate; no hosted backend or production upload is part of this local work.
+
+Local connection preparation now supports a pasted Data API/OData URL, a credential-free saved profile, and a copyable setup request. A real target and test account are still required for step 2. The public preview does not accept real credentials. Keep working in the current checkout; do not move folders or change the FTP build as part of local feature development.
+
 ## Step 1 — Save requests and verify their responses (implemented locally)
 
 Create a reusable library of named queries per connection. Save explicit expectations about returned rows, required fields, payload types, nulls, and response time. Rerun one check or a connection's suite. Show pass, fail, request error, or inconclusive with reasons. Persist query definitions and summaries in IndexedDB, excluding credentials and returned records.

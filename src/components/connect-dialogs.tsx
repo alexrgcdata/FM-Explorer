@@ -20,7 +20,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from './ui/dialog'
-import { Choice } from './shared'
+import { Choice, copyText } from './shared'
+import {
+  readEndpoint,
+  validateDatabaseName,
+  connectionRequest,
+} from '@/lib/connection-setup'
 import { publicPreview } from '@/lib/runtime'
 
 export function ConnectionDialog({
@@ -40,38 +45,42 @@ export function ConnectionDialog({
     [version, setVersion] = useState('vLatest'),
     [error, setError] = useState(''),
     [saving, setSaving] = useState(false)
-  async function save(event: FormEvent) {
-    event.preventDefault()
+  function useEndpoint() {
     try {
-      const url = new URL(host)
-      if (
-        url.protocol !== 'https:' ||
-        url.username ||
-        url.password ||
-        url.pathname !== '/' ||
-        url.search ||
-        url.hash
-      )
-        throw new Error()
-    } catch {
+      const target = readEndpoint(host)
+      setHost(target.host)
+      if (target.database) setDatabase(target.database)
+      if (target.protocol) setProtocol(target.protocol)
+      if (target.apiVersion) setVersion(target.apiVersion)
+      setError('')
+    } catch (error) {
       setError(
-        'Use an HTTPS host only, without credentials, query parameters, or an API path.',
+        error instanceof Error ? error.message : 'Check the endpoint URL.',
       )
-      return
     }
+  }
+  async function save(event?: FormEvent, authenticate = true) {
+    event?.preventDefault()
+    setError('')
     setSaving(true)
     try {
+      const target = readEndpoint(host)
+      const chosenDatabase = (target.database ?? database).trim()
+      const chosenProtocol = target.protocol ?? protocol
+      validateDatabaseName(chosenDatabase)
       const p: Profile = {
         id: crypto.randomUUID(),
         name: name.trim(),
-        host: host.trim().replace(/\/$/, ''),
-        database: database.trim(),
-        protocol,
-        ...(protocol === 'Data API' ? { apiVersion: version } : {}),
+        host: target.host,
+        database: chosenDatabase,
+        protocol: chosenProtocol,
+        ...(chosenProtocol === 'Data API'
+          ? { apiVersion: target.apiVersion ?? version }
+          : {}),
       }
       await w.addProfile(p)
       onOpenChange(false)
-      onAuthenticate(p)
+      if (authenticate) onAuthenticate(p)
       setName('')
       setHost('')
       setDatabase('')
@@ -105,21 +114,43 @@ export function ConnectionDialog({
     )
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="connection-setup-dialog">
         <DialogHeader>
           <div className="dialog-feature-icon">
             <DatabaseZap size={23} />
           </div>
           <DialogTitle>Add a connection</DialogTitle>
           <DialogDescription>
-            Save a profile in IndexedDB, then authenticate through the local
-            service.
+            Prepare a profile first. Credentials are entered separately when you
+            are ready to connect.
           </DialogDescription>
         </DialogHeader>
         <form
           className="connection-form"
           onSubmit={(event) => void save(event)}
         >
+          <details className="connection-prep-guide">
+            <summary>Need the connection details?</summary>
+            <p>
+              You need an HTTPS server address, the exact hosted database name,
+              and access to the selected API. Ask the solution owner for a
+              limited test account through their secure channel.
+            </p>
+            <p>
+              No credentials yet? Save a profile now and connect later. Setup
+              details are not evidence that the server is reachable or
+              compatible.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                void copyText(connectionRequest(protocol, host, database))
+              }
+            >
+              Copy setup request
+            </Button>
+          </details>
           <div className="protocol-picker">
             {(['Data API', 'OData'] as const).map((p) => (
               <button
@@ -145,7 +176,7 @@ export function ConnectionDialog({
             />
           </label>
           <label htmlFor="connection-host">
-            FileMaker host
+            Server address or API URL
             <Input
               id="connection-host"
               required
@@ -160,6 +191,20 @@ export function ConnectionDialog({
               aria-describedby={error ? 'connection-error' : undefined}
             />
           </label>
+          <div className="connection-url-helper">
+            <span>
+              Have a full Data API or OData URL? We can fill in its host,
+              database, and protocol.
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={useEndpoint}
+              disabled={!host.trim()}
+            >
+              Read API URL
+            </Button>
+          </div>
           <label htmlFor="connection-database">
             Database name
             <Input
@@ -207,6 +252,19 @@ export function ConnectionDialog({
               Cancel
             </Button>
             <Button
+              type="button"
+              variant="outline"
+              disabled={
+                saving || !name.trim() || !database.trim() || !host.trim()
+              }
+              onClick={(event) => {
+                if (event.currentTarget.form?.reportValidity())
+                  void save(undefined, false)
+              }}
+            >
+              Save profile only
+            </Button>
+            <Button
               disabled={
                 saving || !name.trim() || !database.trim() || !host.trim()
               }
@@ -216,7 +274,7 @@ export function ConnectionDialog({
               ) : (
                 <ArrowRight size={14} />
               )}
-              Save & authenticate
+              Continue to sign in
             </Button>
           </div>
         </form>
