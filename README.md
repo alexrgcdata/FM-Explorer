@@ -1,6 +1,6 @@
 # FM API Explorer
 
-React/TypeScript developer workbench with charcoal/amber styling, shadcn/Tailwind, an IndexedDB workspace, and a local Node service for FileMaker API requests.
+React/TypeScript developer workbench with a dark purple theme, shadcn/Tailwind, an IndexedDB workspace, and a local Node service for FileMaker API requests.
 
 **Created and maintained by Alex Seidler** · [alex@rgcdata.com](mailto:alex@rgcdata.com) · [GitHub](https://github.com/alexrgcdata)
 
@@ -173,12 +173,12 @@ Copyright © 2026 Alex Seidler.
 
 ## Workspace navigation and welcome
 
-The selected entity is the main object: its name, observed or developer-confirmed description, and factual counts lead the page. Five persistent tabs organize **Overview, Schema, Relationships, API, and AI**. Overview brings together declared keys, reported counts, exposed connections, saved integration checks, and developer knowledge. Unknown business meaning stays explicit; the app does not infer API usage or workflow rules from field names.
+The selected entity is the main object: its name, observed or developer-confirmed description, and factual counts lead the page. Grouped information and compact table spacing restore the fuller workbench layout. Five persistent tabs organize **Overview, Schema, Relationships, API, and AI**. Overview brings together declared keys, reported counts, exposed connections, saved integration checks, and developer knowledge. Unknown business meaning stays explicit; the app does not infer API usage or workflow rules from field names.
 
-A single quiet header contains the connection switcher, search, utilities, and a **Workspace** menu for database-wide tools such as history, saved checks, and handoff packages. The narrow resource list can collapse and becomes a drawer on smaller screens. Field details open on demand; records remain under Schema, and queries and generated types remain under API. Clicking Schema or API returns directly from these subviews. Metadata and context previews stay collapsed until requested.
+The app starts on **Dashboard**, with the current database, connection state, inspected totals, workflow shortcuts, a clickable preview of exposed relationships, and an entity list. The restored two-row top bar places the connection switcher, search, and utilities above direct links to each work area. Active navigation is highlighted; entity pages keep the selected resource as their prominent heading. The narrow resource list can collapse and becomes a drawer on smaller screens. Field details open on demand; records remain under Schema, and queries and generated types remain under API. Clicking Schema or API returns directly from these subviews. Metadata and context previews stay collapsed until requested.
 
 A dismissible welcome screen credits **Alex Seidler / RGC Data Solutions**, linking to [rgcdata.com](https://rgcdata.com/) for custom FileMaker ↔ web ↔ mobile integrations, hosting, and complex development projects. Its optional five-step guide links to the relevant screens. X, Escape, or Explore workspace closes it. **Don't show this on startup** is saved locally in IndexedDB. **Help & shortcuts → Welcome & quick start** reopens it. The guide does not connect, execute a query, or open the external site automatically.
 
 ## Readability
 
-The interface uses a 16px-equivalent body size, 14px-equivalent minimum supporting text, larger controls, and brighter secondary text while retaining the charcoal/amber palette. Font sizes use rem units so browser text preferences and zoom remain useful. Data tables and code panels scroll within their own containers when needed. Relationship graphs can be zoomed and panned.
+The interface uses a 16px-equivalent body size, 14px-equivalent minimum supporting text, larger controls, and brighter secondary text using Alex's palette: background #0B0911, surface #14111D, card #1B1728, primary purple #7C3AED, purple glow #A855F7, text #F8F7FC, and muted text #9D95B8. Success (#22C55E), warning (#F59E0B), and danger (#EF4444) remain separate status colors. Font sizes use rem units so browser text preferences and zoom remain useful. Data tables and code panels scroll within their own containers when needed. Relationship graphs can be zoomed and panned.

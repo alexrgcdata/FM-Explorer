@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/alexrgcdata/FM-Explorer.git"
   },
-  "version": "0.6.0",
+  "version": "0.6.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
