@@ -6,12 +6,13 @@
     "type": "git",
     "url": "https://github.com/alexrgcdata/FM-Explorer.git"
   },
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "build:website": "tsc -b && vite build --mode showcase && node scripts/website-notices.mjs",
+    "build:ftp": "npm run build:website && node scripts/prepare-ftp.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc -b",
     "start": "node --import tsx server/index.ts",

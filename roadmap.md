@@ -1,6 +1,6 @@
 # FM API Explorer — Delivery roadmap
 
-Updated: October 26, 2026
+Updated: October 28, 2026
 
 Product job: help a developer inherit a FileMaker solution, understand its integration-facing structure, and give people or agents a reliable starting package.
 
@@ -14,7 +14,13 @@ The current application is a local workbench with IndexedDB, read-only Data API/
 4. **Refine from pilot feedback.** Observe whether FileMaker and SQL/web developers can find fields, records, and a useful export without coaching. Improve the specific stumbling points before adding more tools.
 5. **Choose a hosted backend only when needed.** PostgreSQL is Alex's preference. Verify the exact Namecheap plan's database access and supported application runtime first. The public FTP preview remains separate; no hosted backend or production upload is part of this local work.
 
-Local connection preparation now supports a pasted Data API/OData URL, a credential-free saved profile, and a copyable setup request. A real target and test account are still required for step 2. The public preview does not accept real credentials. Keep working in the current checkout; do not move folders or change the FTP build as part of local feature development.
+Local connection preparation now supports a pasted Data API/OData URL, a credential-free saved profile, and a copyable setup request. A real target and test account are still required for step 2. The public preview does not accept real credentials. Keep working in the current checkout. Rebuild the manual-upload demo with `npm run build:ftp`; its delivery path stays `FTP-READY/dist/`.
+
+## October 28 local release — workspace portability
+
+Version 0.8 adds Settings → Save & restore workspace. A reviewed JSON file carries one connection's schema history, saved check definitions and developer notes between browsers. Schema/definition validation, lab-only website imports, fresh identifiers and a single transaction protect existing work. Login fields, sessions, returned records, raw responses and run history are excluded. Filter values and developer text remain private content and require acknowledgement before download. This preserves Explorer work, not a FileMaker database backup.
+
+Clearing schemas now requires a separate confirmation explaining that it applies to every connection; users can save the current workspace first. FTP packaging now stages and hash-verifies a fresh `FTP-READY/dist/`, writes local build instructions and retains the preceding package under `.local/`. No website upload or hosted-backend change is included. Real FileMaker trials remain the next external milestone.
 
 ## Step 1 — Save requests and verify their responses (implemented locally)
 

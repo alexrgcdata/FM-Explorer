@@ -20,7 +20,9 @@ The current release is an early local workbench validated against synthetic ODat
 
 ### Website preview by FTP
 
-Run `npm run build:website`, then upload the **contents** of `website-upload/` into a dedicated public folder. Alex's manual upload target is `https://alex.seidler.dev/projects/explorer/`, typically under `public_html/projects/explorer/`. This repository does not automatically deploy it. Assets and fonts use relative paths, so another domain or subfolder also works without rewrites. Keep `index.html`, `favicon.svg`, `THIRD-PARTY-NOTICES.txt`, and the entire `assets/` directory together. See [FTP-INSTRUCTIONS.txt](FTP-INSTRUCTIONS.txt).
+Run `npm run build:ftp`, then upload the **contents** of `FTP-READY/dist/` into the domain's `projects/explorer/` folder. Alex's manual upload target is `https://alex.seidler.dev/projects/explorer/`. Find the domain's document root under cPanel **Domains**; it is not necessarily the account's main `public_html` folder. Do not upload the `dist` directory itself. Keep `index.html`, `favicon.svg`, `THIRD-PARTY-NOTICES.txt`, and the entire `assets/` directory together. See [FTP-INSTRUCTIONS.txt](FTP-INSTRUCTIONS.txt).
+
+This command builds `website-upload/`, stages and verifies a fresh copy, then updates the same `FTP-READY/dist/` folder. `FTP-READY/READ-ME-FIRST.txt` gives upload steps; `BUILD-INFO.json` records build time and SHA-256 hashes. These two reference files stay on your computer. The preceding FTP package is retained under ignored `.local/ftp-previous-*` for recovery. Nothing deploys automatically. Relative asset paths allow other domains and subfolders without rewrites. `npm run build:website` still produces the original `website-upload/` output; the root `dist/` remains the local Node service build.
 
 This separate browser-only build automatically loads synthetic fixtures. It uses no Node/PHP service, accepts no real database authentication, and makes no external database or AI requests. IndexedDB uses the separate `fm-api-explorer-showcase` database. Saved queries/notes belong to each visitor's browser. Response notes, synthetic-data labels, and the browser-preview footer distinguish simulated operations from real FileMaker reads. It demonstrates the interface, local filtering, exports, and workflows; it does not validate a real FileMaker connection. Keep the normal local build for real endpoint testing.
 
@@ -55,7 +57,15 @@ See [roadmap.md](roadmap.md) for the delivery sequence. Step 1 is available unde
 
 Definitions and the latest 200 result summaries across connections persist in IndexedDB v2. Edits increment the definition revision and require a new run. Earlier results remain in history. No returned row values or authentication are stored in the check summaries. Saved query filter values are stored locally and may contain private data.
 
-Export creates versioned JSON request definitions and summaries, with filter values redacted by default and `requiresFilterValues` marking definitions needing those values again. This release does not import or automatically execute exported definitions. Empty results make selected field checks inconclusive; a minimum-row failure still fails. Checks cover the returned page, not every record or a FileMaker backup.
+Export creates versioned JSON request definitions and summaries, with filter values redacted by default and `requiresFilterValues` marking definitions needing those values again. Standalone request-definition exports are not imported or automatically executed. To transfer saved checks with their original values, use the separate workspace transfer below. Empty results make selected field checks inconclusive; a minimum-row failure still fails. Checks cover the returned page, not every record or a FileMaker backup.
+
+### Save and restore your Explorer work
+
+Open **Settings → Save & restore workspace**. Download a versioned JSON file for the current connection: its nonsecret connection details, up to 50 schema versions, saved check definitions, and developer notes. Download requires acknowledging that server/database names, saved filter values and note text may be private. Authentication fields, live sessions, returned records, raw API response bodies, activity logs, check-run results and display preferences are excluded. Secrets manually typed into filter values or notes are ordinary text and are included; this export is not automatic redaction.
+
+Choose that file in the same dialog on another browser/computer and review its source and counts before **Import a copy**. Files are limited to 10 MB and validated before persistence. All writes use one IndexedDB transaction. Matching host/database/protocol/API-version profiles are reused; new profiles and imported checks/notes receive fresh identifiers. Existing definitions and current schema are never replaced. A connection exceeding 100 checks or 200 notes rejects the entire import. Existing schema history takes priority within its 50-version cap; additional imported versions are skipped with a count. Reimporting creates more copies.
+
+Import never opens a connection or runs queries. Reconnect manually in the local application when ready. The website demo imports only bundled lab workspaces. Imported developer-note confirmation is carried over from the file, not independently verified. A workspace export preserves Explorer knowledge; it cannot restore FileMaker records, deleted fields, credentials or a database.
 
 ## Schema history and comparisons
 
@@ -155,6 +165,7 @@ These are planned or exploratory capabilities, not promises of functionality alr
 npm run typecheck
 npm test
 npm run build
+npm run build:ftp
 ```
 
 Tests exercise both local protocol flows, session ownership, guards, empty finds, native errors, continuation pagination, schema parsing, precision, query escaping, and IndexedDB's exclusion of credentials/record rows. Browser checks use local synthetic data; they do not establish real FileMaker or physical iOS/Safari compatibility.
@@ -166,6 +177,7 @@ Tests exercise both local protocol flows, session ownership, guards, empty finds
 - `server/lab.ts`: synthetic native-shaped protocol endpoints.
 - `src/lib/workspace.tsx`: active profiles/sessions/schema, history, preferences.
 - `src/lib/storage.ts`: IndexedDB stores and migration.
+- `src/lib/workspace-transfer.ts`: validated, credential-field-free workspace transfer and atomic import.
 - `src/lib/schema-history.ts`: structural comparison, provenance, and potential saved-request impact.
 - `src/lib/handoff.ts`: portable package assembly, redaction, hashes, and ZIP creation.
 - `src/lib/handoff-runner.ts`: standalone exported Node read runner.

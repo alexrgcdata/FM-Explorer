@@ -2,10 +2,10 @@ FM API Explorer — website preview
 Created by Alex Seidler / RGC Data Solutions
 
 BUILD FOLDER
-C:\Users\agsei\Desktop\Personal Projects\FM API Explorer\website-upload
+C:\Users\agsei\Desktop\Personal Projects\FM API Explorer\FTP-READY\dist
 
 WHAT TO FTP
-Upload ALL CONTENTS of website-upload:
+Upload ALL CONTENTS of FTP-READY\dist:
   index.html
   favicon.svg
   THIRD-PARTY-NOTICES.txt
@@ -27,7 +27,7 @@ Example final server layout:
         THIRD-PARTY-NOTICES.txt
         assets/
 
-Do not upload the whole project or nest website-upload inside projects/explorer.
+Do not upload the whole project or nest dist inside projects/explorer.
 Do not replace your website's existing root index file.
 No node_modules, server, src, .git, .env, or credentials are needed.
 No PHP, Node, database, npm, or server API is required for this preview.
@@ -53,8 +53,9 @@ IF THE PAGE DOES NOT LOAD
   with your host. This build does not require a rewrite configuration.
 
 REBUILD AFTER SOURCE CHANGES
-From the project folder: npm run build:website
-Then upload the new website-upload contents again, including all assets.
+From the project folder: npm run build:ftp
+Then upload the new FTP-READY\dist contents again, including all assets.
+READ-ME-FIRST.txt and BUILD-INFO.json outside dist stay on your computer.
 The normal npm run build output in dist is the LOCAL SERVICE build, not this one.
 
 Nothing was uploaded to any website by this task.

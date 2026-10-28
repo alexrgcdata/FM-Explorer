@@ -482,11 +482,7 @@ function useWorkspaceState() {
     })
   }
   async function forgetSnapshots() {
-    await persist(
-      (async () => {
-        await storage.clearSnapshots()
-      })(),
-    )
+    await storage.clearSnapshots()
     setSnapshots({})
     setSchemaVersions([])
     toast.success('Saved schema snapshots cleared')
@@ -507,6 +503,29 @@ function useWorkspaceState() {
       return
     await storage.deleteKnowledgeNote(id)
     setKnowledgeNotes((current) => current.filter((n) => n.id !== id))
+  }
+  async function reloadStoredWorkspace() {
+    const saved = await storage.getProfiles()
+    const list = [
+      ...labProfiles,
+      ...saved.filter((p) => !p.lab && !labProfiles.some((l) => l.id === p.id)),
+    ]
+    const [requests, notes, versions, cached] = await Promise.all([
+      storage.getRequests(),
+      storage.getKnowledgeNotes(),
+      Promise.all(list.map((p) => storage.getSchemaVersions(p.id))),
+      Promise.all(list.map((p) => storage.getSnapshot(p.id))),
+    ])
+    setProfiles(list)
+    setSavedRequests(requests)
+    setKnowledgeNotes(notes)
+    setSchemaVersions(versions.flat())
+    setSnapshots((current) => ({
+      ...Object.fromEntries(
+        cached.filter((s): s is Snapshot => !!s).map((s) => [s.profileId, s]),
+      ),
+      ...current,
+    }))
   }
   return {
     ready,
@@ -552,6 +571,7 @@ function useWorkspaceState() {
     knowledgeNotes: knowledgeNotes.filter((n) => n.profileId === profile.id),
     saveKnowledgeNote,
     deleteKnowledgeNote,
+    reloadStoredWorkspace,
   }
 }
 type Workspace = ReturnType<typeof useWorkspaceState>

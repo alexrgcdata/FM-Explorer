@@ -88,6 +88,11 @@ import {
 } from './components/connect-dialogs'
 
 const RelationshipView = lazy(() => import('./components/relationship-view'))
+const WorkspaceTransferDialog = lazy(() =>
+  import('./components/workspace-transfer-dialog').then((module) => ({
+    default: module.WorkspaceTransferDialog,
+  })),
+)
 const HandoffView = lazy(() =>
   import('./components/handoff-view').then((module) => ({
     default: module.HandoffView,
@@ -163,6 +168,9 @@ function Explorer() {
     [managerOpen, setManagerOpen] = useState(false),
     [authProfile, setAuthProfile] = useState<Profile | null>(null),
     [settingsOpen, setSettingsOpen] = useState(false),
+    [transferOpen, setTransferOpen] = useState(false),
+    [clearSchemasOpen, setClearSchemasOpen] = useState(false),
+    [clearingSchemas, setClearingSchemas] = useState(false),
     [helpOpen, setHelpOpen] = useState(false),
     [welcomeOpen, setWelcomeOpen] = useState(false),
     [fieldFocus, setFieldFocus] = useState<string>(),
@@ -943,7 +951,7 @@ function Explorer() {
                     : snapshot
                       ? 'Saved schema'
                       : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.7.0
+                <span className="footer-dot">·</span>v0.8.0
               </span>
             </footer>
           </main>
@@ -1034,6 +1042,77 @@ function Explorer() {
           setConnectionOpen(true)
         }}
       />
+      {transferOpen && (
+        <Suspense fallback={null}>
+          <WorkspaceTransferDialog
+            open={transferOpen}
+            onOpenChange={setTransferOpen}
+          />
+        </Suspense>
+      )}
+      <Dialog
+        open={clearSchemasOpen}
+        onOpenChange={(next) => {
+          if (!clearingSchemas) setClearSchemasOpen(next)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Clear all saved schemas?</DialogTitle>
+            <DialogDescription>
+              This removes saved schema inspections and version history for
+              every connection in this browser. Saved checks, notes and
+              connection profiles remain. This cannot be undone in Explorer.
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Save a workspace file for each connection you want to keep before
+            continuing.
+          </p>
+          <Button
+            variant="outline"
+            disabled={clearingSchemas}
+            onClick={() => {
+              setClearSchemasOpen(false)
+              setTransferOpen(true)
+            }}
+          >
+            Save current workspace first
+          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={clearingSchemas}
+              onClick={() => setClearSchemasOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={clearingSchemas}
+              onClick={async () => {
+                setClearingSchemas(true)
+                try {
+                  await w.forgetSnapshots()
+                  setClearSchemasOpen(false)
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : 'Could not clear saved schemas.',
+                  )
+                } finally {
+                  setClearingSchemas(false)
+                }
+              }}
+            >
+              {clearingSchemas
+                ? 'Clearing…'
+                : 'Clear schemas for all connections'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1086,7 +1165,22 @@ function Explorer() {
               metadata.
             </p>
           </div>
-          <Button variant="outline" onClick={() => void w.forgetSnapshots()}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSettingsOpen(false)
+              setTransferOpen(true)
+            }}
+          >
+            <ArrowDownToLine size={16} /> Save & restore workspace
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSettingsOpen(false)
+              setClearSchemasOpen(true)
+            }}
+          >
             Clear saved schemas & version history
           </Button>
         </DialogContent>
