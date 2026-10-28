@@ -14,19 +14,20 @@ Upload ALL CONTENTS of website-upload:
 WHERE TO PUT THEM
 1. Connect to your own website with your FTP/SFTP program.
 2. Open its public web folder (often public_html, www, or htdocs).
-3. Create a folder called fm-explorer inside that public web folder.
-4. Upload the four items above INSIDE fm-explorer.
-5. Open https://YOUR-DOMAIN/fm-explorer/ with the trailing slash.
+3. Open your projects folder and create an explorer folder inside it.
+4. Upload the four items above INSIDE projects/explorer.
+5. Open https://alex.seidler.dev/projects/explorer/ with the trailing slash.
 
 Example final server layout:
   public_html/
-    fm-explorer/
-      index.html
-      favicon.svg
-      THIRD-PARTY-NOTICES.txt
-      assets/
+    projects/
+      explorer/
+        index.html
+        favicon.svg
+        THIRD-PARTY-NOTICES.txt
+        assets/
 
-Do not upload the whole project or nest website-upload inside fm-explorer.
+Do not upload the whole project or nest website-upload inside projects/explorer.
 Do not replace your website's existing root index file.
 No node_modules, server, src, .git, .env, or credentials are needed.
 No PHP, Node, database, npm, or server API is required for this preview.
@@ -44,7 +45,7 @@ Real Data API/OData connectors remain in the local Node application, with
 real FileMaker Server/Cloud acceptance still pending.
 
 IF THE PAGE DOES NOT LOAD
-- Check that index.html is directly inside the fm-explorer folder.
+- Check that index.html is directly inside projects/explorer.
 - Check that assets is beside index.html and fully uploaded.
 - Open the folder URL with a trailing slash, not the index file on your PC.
 - Use HTTPS, then refresh the browser with Ctrl+F5.
