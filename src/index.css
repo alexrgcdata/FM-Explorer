@@ -6873,3 +6873,131 @@ body {
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
 }
+
+/* Optional screen explanations; hidden entirely in the default expert view. */
+.screen-guide {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--purple);
+  border-radius: 6px;
+  background: var(--surface-deep);
+  padding: 16px 18px;
+  margin: 0 0 20px;
+  min-width: 0;
+}
+.screen-guide-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+.screen-guide-heading > svg {
+  color: var(--purple);
+  flex-shrink: 0;
+}
+.screen-guide-heading h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.screen-guide-heading > button {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+}
+.screen-guide p {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+  max-width: 900px;
+}
+.screen-guide .screen-guide-try {
+  margin-top: 7px;
+}
+.screen-guide-try strong {
+  font-weight: 550;
+  color: var(--foreground);
+}
+.screen-guide-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+.screen-guide-bottom > details {
+  flex: 1;
+  min-width: 0;
+}
+.screen-guide summary {
+  font-size: 0.875rem;
+  color: var(--foreground);
+  cursor: pointer;
+  line-height: 1.7;
+}
+.screen-guide dl {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+.screen-guide dl > div {
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr);
+  gap: 12px;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+.screen-guide dt {
+  color: var(--foreground);
+  font-weight: 550;
+}
+.screen-guide dd {
+  color: var(--muted-foreground);
+}
+.screen-guide-files {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 14px;
+}
+.screen-guide-files p {
+  margin-top: 8px;
+}
+.screen-guide-bottom .quiet-link {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.restored-shell .screen-guide-toggle {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  gap: 7px;
+}
+.restored-shell .screen-guide-toggle[aria-pressed='true'] {
+  color: var(--accent-foreground);
+  background: var(--amber-wash);
+}
+.welcome-actions {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .screen-guide {
+    padding: 14px;
+  }
+  .screen-guide-bottom {
+    flex-direction: column;
+  }
+  .screen-guide dl > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .screen-guide-toggle span {
+    display: none;
+  }
+  .restored-shell .screen-guide-toggle {
+    width: 30px;
+    padding: 0;
+  }
+  .restored-shell .workbench-utilities > :nth-child(2) {
+    display: none;
+  }
+}

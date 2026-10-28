@@ -47,6 +47,7 @@ function useWorkspaceState() {
   const [schemaVersions, setSchemaVersions] = useState<SchemaVersion[]>([])
   const [knowledgeNotes, setKnowledgeNotes] = useState<KnowledgeNote[]>([])
   const [welcomeHidden, setWelcomeHiddenState] = useState(false)
+  const [screenGuidance, setScreenGuidanceState] = useState(false)
   const [resourceRailCollapsed, setResourceRailCollapsedState] = useState(false)
   const mounted = useRef(true),
     connecting = useRef(false)
@@ -117,6 +118,9 @@ function useWorkspaceState() {
         setMotionState(await storage.preference('reduced-motion', false))
         setWelcomeHiddenState(
           await storage.preference('welcome-hidden-v1', false),
+        )
+        setScreenGuidanceState(
+          await storage.preference('screen-guidance-v1', false),
         )
         setResourceRailCollapsedState(
           await storage.preference('resource-rail-collapsed', false),
@@ -448,6 +452,10 @@ function useWorkspaceState() {
     setWelcomeHiddenState(value)
     await persist(storage.setPreference('welcome-hidden-v1', value))
   }
+  async function setScreenGuidance(value: boolean) {
+    setScreenGuidanceState(value)
+    await persist(storage.setPreference('screen-guidance-v1', value))
+  }
   async function setResourceRailCollapsed(value: boolean) {
     setResourceRailCollapsedState(value)
     await persist(storage.setPreference('resource-rail-collapsed', value))
@@ -528,6 +536,8 @@ function useWorkspaceState() {
     setCompact,
     setReducedMotion,
     welcomeHidden,
+    screenGuidance,
+    setScreenGuidance,
     setWelcomeHidden,
     resourceRailCollapsed,
     setResourceRailCollapsed,

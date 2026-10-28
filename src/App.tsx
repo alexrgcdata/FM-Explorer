@@ -8,6 +8,7 @@ import {
 } from 'react'
 import {
   Activity,
+  BookOpen,
   ArrowDownToLine,
   ArrowRight,
   ArrowUpRight,
@@ -78,6 +79,7 @@ import {
 } from './components/resource-workspace'
 import { SchemaHistoryView } from './components/schema-history-view'
 import { WelcomeDialog } from './components/welcome-dialog'
+import { ScreenGuide } from './components/screen-guide'
 import { publicPreview } from './lib/runtime'
 import type { SavedRequest } from './lib/saved-requests'
 import {
@@ -386,6 +388,21 @@ function Explorer() {
             </DropdownMenu>
           </div>
           <div className="workbench-utilities">
+            <Button
+              className="screen-guide-toggle"
+              variant={w.screenGuidance ? 'secondary' : 'ghost'}
+              aria-label={
+                w.screenGuidance
+                  ? 'Turn off screen guidance'
+                  : 'Turn on screen guidance'
+              }
+              aria-pressed={w.screenGuidance}
+              onClick={() => void w.setScreenGuidance(!w.screenGuidance)}
+              title="Optional explanations and next steps"
+            >
+              <BookOpen size={17} />
+              <span>Guide</span>
+            </Button>
             <IconButton
               label="Help & shortcuts"
               onClick={() => setHelpOpen(true)}
@@ -691,6 +708,13 @@ function Explorer() {
                 )}
               </div>
             </div>
+            {(!isEntityPage(page) || !entity) && (
+              <ScreenGuide
+                page={page}
+                onNavigate={navigate}
+                onConnect={() => setManagerOpen(true)}
+              />
+            )}
             {w.storageError && (
               <div className="error-banner" role="alert">
                 {w.storageError}
@@ -1019,6 +1043,20 @@ function Explorer() {
             </DialogDescription>
           </DialogHeader>
           <div className="setting-row">
+            <label htmlFor="screen-guidance">
+              <strong>Explain each screen</strong>
+              <span>
+                Plain-English definitions and suggested next steps. Turn off for
+                a denser workspace.
+              </span>
+            </label>
+            <Switch
+              id="screen-guidance"
+              checked={w.screenGuidance}
+              onCheckedChange={(value) => void w.setScreenGuidance(value)}
+            />
+          </div>
+          <div className="setting-row">
             <label htmlFor="compact-rows">
               <strong>Compact record rows</strong>
               <span>Fit more records into the data browser.</span>
@@ -1070,6 +1108,18 @@ function Explorer() {
           >
             Welcome & quick start
             <ArrowRight size={15} />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              void w.setScreenGuidance(!w.screenGuidance)
+              setHelpOpen(false)
+            }}
+          >
+            {w.screenGuidance
+              ? 'Turn off explanations'
+              : 'Explain each screen as I explore'}
+            <BookOpen size={16} />
           </Button>
           <div className="help-steps">
             <div>

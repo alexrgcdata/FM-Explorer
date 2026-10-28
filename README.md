@@ -191,6 +191,12 @@ The app starts on **Dashboard**, with the database name, connection state, three
 
 A dismissible welcome screen credits **Alex Seidler / RGC Data Solutions**, linking to [rgcdata.com](https://rgcdata.com/) for custom FileMaker ↔ web ↔ mobile integrations, hosting, and complex development projects. Its optional five-step guide links to the relevant screens. X, Escape, or Explore workspace closes it. **Don't show this on startup** is saved locally in IndexedDB. **Help & shortcuts → Welcome & quick start** reopens it. The guide does not connect, execute a query, or open the external site automatically.
 
+## Optional newcomer guidance
+
+Use **Guide** in the header, **Explore with guidance** on the welcome screen, or **Settings → Explain each screen**. Guidance is off by default and its choice persists in IndexedDB. Each work area has a plain-English explanation, a suggested next action, and an expandable glossary; schema/record explanations stay beside the selected entity's tabs. Experienced developers can turn the guide off or dismiss it with X. The helper uses authored text, not an AI provider, and does not execute requests automatically.
+
+The dashboard's optional **Do I need to upload database files?** explanation distinguishes connecting to a hosted FileMaker database from downloading exports. This app does not import `.fmp12` files. Website owners must upload the static build's assets when publishing the preview; end users do not supply those files to connect a database. Real Server/Cloud acceptance remains pending.
+
 ## Readability
 
 The interface uses a 16px-equivalent body size, 14px-equivalent minimum supporting text, larger controls, and brighter secondary text using neutral near-black surfaces, orange (#F3A547) primary actions and navigation, and restrained violet (#9F8CB8) details with a subtle purple top bar. Success (#22C55E), warning (#F59E0B), and danger (#EF4444) remain separate status colors. Font sizes use rem units so browser text preferences and zoom remain useful. Data tables and code panels scroll within their own containers when needed. Relationship graphs can be zoomed and panned.

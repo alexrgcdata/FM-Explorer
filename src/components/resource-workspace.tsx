@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from './ui/dropdown-menu'
 import { KnowledgeDialog } from './knowledge-dialog'
+import { ScreenGuide } from './screen-guide'
 
 export const isEntityPage = (page: Page) =>
   [
@@ -151,6 +152,11 @@ export function ResourceWorkspace({
           <TabsTrigger value="ai">AI</TabsTrigger>
         </TabsList>
         <TabsContent value={tabFor(page)} className="entity-reading-content">
+          <ScreenGuide
+            page={page}
+            onNavigate={onNavigate}
+            onConnect={onConnect}
+          />
           {children}
         </TabsContent>
       </Tabs>

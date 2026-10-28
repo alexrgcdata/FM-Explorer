@@ -264,6 +264,15 @@ export function WelcomeDialog({
                   Explore workspace
                   <ArrowRight size={15} />
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    void w.setScreenGuidance(true)
+                    dismiss()
+                  }}
+                >
+                  Explore with guidance
+                </Button>
               </div>
             )}
           </div>
