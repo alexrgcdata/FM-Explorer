@@ -28,9 +28,11 @@ const profileSchema = z
         const lab = labProfiles.find((l) => l.id === p.id)
         if (
           !lab ||
+          lab.name !== p.name ||
           lab.host !== p.host ||
           lab.database !== p.database ||
-          lab.protocol !== p.protocol
+          lab.protocol !== p.protocol ||
+          lab.apiVersion !== p.apiVersion
         )
           throw new Error('The bundled lab connection does not match.')
       } else {
@@ -224,6 +226,7 @@ export async function importWorkspaceArchive(
     const profiles = await tx.objectStore('profiles').getAll()
     const existing = profiles.find(
       (p) =>
+        p.name === archive.profile.name &&
         p.lab === archive.profile.lab &&
         p.host === archive.profile.host &&
         p.database === archive.profile.database &&
@@ -249,7 +252,7 @@ export async function importWorkspaceArchive(
       throw new Error(
         'This connection would exceed 100 saved checks or 200 notes. Remove unneeded items before importing; nothing was changed.',
       )
-    await tx.objectStore('profiles').put(profile)
+    if (!existing) await tx.objectStore('profiles').add(profile)
     const existingVersions = await tx
       .objectStore('schemaVersions')
       .index('by-profile')

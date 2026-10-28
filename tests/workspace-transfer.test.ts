@@ -101,6 +101,47 @@ test('a write failure rolls back every imported store, including the new profile
   assert.equal(await storage.getSnapshot(profile.id), undefined)
 })
 
+test('real workspace restore remaps every item to the new profile and keeps differently named connections separate', async () => {
+  const real = {
+    id: 'original-real',
+    name: 'Read-only CRM',
+    host: 'https://fm.example.test',
+    database: profile.database,
+    protocol: profile.protocol,
+  }
+  const realSnapshot = { ...snapshot, profileId: real.id, source: real.host }
+  const archive = buildWorkspaceArchive({
+    profile: real,
+    schemaVersions: [makeSchemaVersion(realSnapshot, real)],
+    savedRequests: [{ ...request, profileId: real.id }],
+    knowledgeNotes: [{ ...note, profileId: real.id }],
+  })
+  await storage.saveProfile({
+    ...real,
+    id: 'different-role',
+    name: 'Admin CRM',
+  })
+  const result = await importWorkspaceArchive(archive)
+  assert.notEqual(result.profile.id, real.id)
+  assert.notEqual(result.profile.id, 'different-role')
+  assert.equal((await storage.getProfiles()).length, 2)
+  assert.equal((await storage.getRequests())[0].profileId, result.profile.id)
+  assert.equal(
+    (await storage.getKnowledgeNotes())[0].profileId,
+    result.profile.id,
+  )
+  assert.equal((await storage.getSchemaVersions(result.profile.id)).length, 1)
+  assert.equal(
+    (await storage.getSnapshot(result.profile.id))?.profileId,
+    result.profile.id,
+  )
+  assert.equal((await storage.getSchemaVersions('different-role')).length, 0)
+  const second = await importWorkspaceArchive(archive)
+  assert.equal(second.profile.id, result.profile.id)
+  assert.equal((await storage.getProfiles()).length, 2)
+  assert.equal((await storage.getRequests()).length, 2)
+})
+
 test('workspace exports allowlisted schema, definitions and notes, excluding auth fields and raw records', () => {
   const version = {
     ...makeSchemaVersion(snapshot, profile),
@@ -157,6 +198,12 @@ test('import rejects invalid JSON, future formats, foreign-profile items, duplic
     /10 MB/,
   )
   for (const mutate of [
+    (v: any) => {
+      v.profile.name = 'Forged lab name'
+    },
+    (v: any) => {
+      v.profile.apiVersion = 'v2'
+    },
     (v: any) => {
       v.version = 2
     },
