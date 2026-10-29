@@ -32,7 +32,9 @@ Before calling live integrations production-ready, record actual FileMaker versi
 
 Navigation keeps Dashboard, Schema, Records, Relationships and History visible; **Tools** groups queries, saved checks, developer exports, handoff packages and AI context. Entity tabs keep **Fields** and **Records** distinct. Failed lazy-loaded screens offer a reload action without clearing the workspace. Connection removal requires confirmation and reports persistence errors.
 
-The dependency audit on October 28, 2026 reported no known advisories in the installed dependency tree. This is a package-registry check, not a security certification. Browser QA uses Chromium; physical Safari/iOS testing and deployed-host acceptance remain pending. A large initial-bundle build advisory remains a performance follow-up.
+The dependency audit on October 28, 2026 reported no known advisories in the installed dependency tree. This is a package-registry check, not a security certification. Browser QA uses Chromium; physical Safari/iOS testing and deployed-host acceptance remain pending. Records, relationship graphs, workspace transfers, handoff packages, and entity AI context load on demand to keep the first screen lighter.
+
+Version 0.9.1 expands **Ctrl/Cmd+K** (or `/`) to resources, field names/native types, tools, saved checks, and workspace actions. Search for “TypeScript”, “Postman”, “MCP”, or “backup” to jump directly to the relevant screen. Enter opens the first result; Tab moves through result buttons. On narrow screens, use **Tools → Search workspace**. Date/timestamp filters reject invalid calendar values and trailing expressions. Generated TypeScript handles reserved resource names, and Postman/OpenAPI reads use canonical, encoded protocol paths rather than imported endpoint text.
 
 ## Start
 
@@ -178,6 +180,10 @@ Schema history and integration/AI handoff packages are available now. The next m
 These are planned or exploratory capabilities, not promises of functionality already available. Schema snapshots document inspected structure; they are not FileMaker database backups or restore files.
 
 ## Checks
+
+Run `npm run verify:release` for the complete local release check. It runs the automated suite, builds the connected app and FTP demo, then independently verifies the FTP folder's complete file list, SHA-256 hashes, and entry-point assets. It stops on failure and never contacts a real FileMaker server. Browser QA and deployed-host acceptance remain separate.
+
+Individual checks:
 
 ```powershell
 npm run typecheck

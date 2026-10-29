@@ -65,7 +65,6 @@ import { Switch } from './components/ui/switch'
 import { TooltipProvider } from './components/ui/tooltip'
 import { IconButton, TypeIcon } from './components/shared'
 import { SchemaView } from './components/schema-view'
-import { RecordsView } from './components/records-view'
 import { QueryView } from './components/query-view'
 import { GenerateView } from './components/generate-view'
 import { ConnectionManager } from './components/connection-manager'
@@ -73,7 +72,6 @@ import { SavedRequestsView } from './components/saved-requests-view'
 import { WorkspaceDashboard } from './components/workspace-dashboard'
 import { EntityOverview } from './components/entity-overview'
 import { EntityApi } from './components/entity-api'
-import { EntityAi } from './components/entity-ai'
 import {
   ResourceWorkspace,
   isEntityPage,
@@ -90,6 +88,16 @@ import {
 } from './components/connect-dialogs'
 
 const RelationshipView = lazy(() => import('./components/relationship-view'))
+const RecordsView = lazy(() =>
+  import('./components/records-view').then((module) => ({
+    default: module.RecordsView,
+  })),
+)
+const EntityAi = lazy(() =>
+  import('./components/entity-ai').then((module) => ({
+    default: module.EntityAi,
+  })),
+)
 const WorkspaceTransferDialog = lazy(() =>
   import('./components/workspace-transfer-dialog').then((module) => ({
     default: module.WorkspaceTransferDialog,
@@ -136,6 +144,16 @@ const primaryPages: Page[] = [
   'history',
 ]
 const toolPages: Page[] = ['query', 'requests', 'developer', 'handoff', 'ai']
+const searchKeywords: Partial<Record<Page, string>> = {
+  developer: 'typescript interfaces json schema openapi postman export code',
+  ai: 'mcp context markdown documentation agents',
+  query: 'filter sort request odata find',
+  requests: 'saved checks expectations assertions suite',
+  history: 'snapshots compare diff baseline changes',
+  relationships: 'graph connections dependencies',
+  records: 'rows data search pagination',
+  handoff: 'download zip integration package runner',
+}
 const descriptions: Record<Page, string> = {
   'entity-overview': 'Understand this entity.',
   api: 'Read access and integration expectations.',
@@ -250,22 +268,87 @@ function Explorer() {
       toast.error(error instanceof Error ? error.message : 'Refresh failed.')
     }
   }
-  const matches = entities
+  const searchTerm = globalSearch.trim().toLowerCase()
+  const schemaMatches = entities
     .flatMap((e) => [
-      ...(e.name.toLowerCase().includes(globalSearch.toLowerCase())
+      ...(e.name.toLowerCase().includes(searchTerm)
         ? [{ entity: e.name, label: e.name, type: 'Resource' }]
         : []),
       ...e.fields
         .filter(
           (f) =>
-            globalSearch.length > 0 &&
+            searchTerm.length > 0 &&
             `${f.name} ${f.nativeType ?? f.type}`
               .toLowerCase()
-              .includes(globalSearch.toLowerCase()),
+              .includes(searchTerm),
         )
         .map((f) => ({ entity: e.name, label: f.name, type: 'Field' })),
     ])
-    .slice(0, 40)
+    .slice(0, 30)
+  const matches = [
+    ...schemaMatches.map((result) => ({
+      ...result,
+      open: () => {
+        setEntityName(result.entity)
+        setFieldFocus(result.type === 'Field' ? result.label : undefined)
+        navigate('schema')
+      },
+    })),
+    ...navigation
+      .filter((item) =>
+        `${item.title} ${navLabels[item.id]} ${searchKeywords[item.id] ?? ''}`
+          .toLowerCase()
+          .includes(searchTerm),
+      )
+      .map((item) => ({
+        entity: 'Workspace',
+        label: item.title,
+        type: 'Tool',
+        open: () => navigate(item.id),
+      })),
+    ...w.savedRequests
+      .filter(
+        (item) =>
+          searchTerm &&
+          `${item.name} ${item.query.entity}`
+            .toLowerCase()
+            .includes(searchTerm),
+      )
+      .slice(0, 10)
+      .map((item) => ({
+        entity: item.query.entity,
+        label: item.name,
+        type: 'Saved check',
+        open: () => {
+          navigate('requests')
+          setRequestFilter(item.name)
+        },
+      })),
+    ...[
+      {
+        entity: 'Workspace',
+        label: 'Settings & backup',
+        type: 'Action',
+        open: () => setSettingsOpen(true),
+      },
+      {
+        entity: 'Workspace',
+        label: 'Help & quick start',
+        type: 'Action',
+        open: () => setHelpOpen(true),
+      },
+      {
+        entity: 'Workspace',
+        label: 'Manage connections',
+        type: 'Action',
+        open: () => setManagerOpen(true),
+      },
+    ].filter((item) => item.label.toLowerCase().includes(searchTerm)),
+  ]
+  function openSearchResult(result: (typeof matches)[number]) {
+    result.open()
+    setSearchOpen(false)
+  }
   if (!w.ready)
     return (
       <div className="loading-panel">
@@ -349,7 +432,7 @@ function Explorer() {
             onClick={() => setSearchOpen(true)}
           >
             <Search size={17} />
-            <span>Search entities & fields</span>
+            <span>Search schema & tools</span>
             <kbd>Ctrl K</kbd>
           </button>
           <div className="workbench-connection">
@@ -517,6 +600,12 @@ function Explorer() {
                     </DropdownMenuItem>
                   ))}
                 <DropdownMenuSeparator className="compact-workspace-action" />
+                <DropdownMenuItem
+                  className="compact-workspace-action"
+                  onSelect={() => setSearchOpen(true)}
+                >
+                  <Search size={16} /> Search workspace
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="compact-workspace-action"
                   onSelect={() => setSettingsOpen(true)}
@@ -935,11 +1024,19 @@ function Explorer() {
                         <EntityApi entity={entity} onNavigate={navigate} />
                       )}
                       {page === 'ai' && (
-                        <EntityAi
-                          key={profile.id + entity.name}
-                          entity={entity}
-                          onNavigate={navigate}
-                        />
+                        <Suspense
+                          fallback={
+                            <p className="subtle-note" role="status">
+                              Loading entity context…
+                            </p>
+                          }
+                        >
+                          <EntityAi
+                            key={profile.id + entity.name}
+                            entity={entity}
+                            onNavigate={navigate}
+                          />
+                        </Suspense>
                       )}
                       {page === 'schema' && (
                         <SchemaView
@@ -952,11 +1049,19 @@ function Explorer() {
                         />
                       )}
                       {page === 'records' && (
-                        <RecordsView
-                          key={`${profile.id}:${entity.name}`}
-                          entity={entity}
-                          compact={w.compact}
-                        />
+                        <Suspense
+                          fallback={
+                            <p className="subtle-note" role="status">
+                              Loading data browser…
+                            </p>
+                          }
+                        >
+                          <RecordsView
+                            key={`${profile.id}:${entity.name}`}
+                            entity={entity}
+                            compact={w.compact}
+                          />
+                        </Suspense>
                       )}
                       {page === 'query' && (
                         <QueryView
@@ -1016,7 +1121,7 @@ function Explorer() {
                     : snapshot
                       ? 'Saved schema'
                       : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.9.0
+                <span className="footer-dot">·</span>v0.9.1
               </span>
             </footer>
           </main>
@@ -1030,32 +1135,34 @@ function Explorer() {
               Search your workspace
             </DialogTitle>
             <DialogDescription>
-              Search inspected resources, field names, and native types.
+              Find resources, fields, tools, saved checks, and workspace
+              settings.
             </DialogDescription>
           </DialogHeader>
           <Input
             aria-label="Search workspace resources"
-            placeholder="Search resources or fields…"
+            placeholder="Search fields, tools, saved checks…"
             value={globalSearch}
             onChange={(e) => setGlobalSearch(e.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && matches[0]) {
+                event.preventDefault()
+                openSearchResult(matches[0])
+              }
+            }}
           />
           <div className="search-results">
             {matches.map((result) => (
               <button
                 key={`${result.entity}:${result.type}:${result.label}`}
-                onClick={() => {
-                  setEntityName(result.entity)
-                  setFieldFocus(
-                    result.type === 'Field' ? result.label : undefined,
-                  )
-                  navigate('schema')
-                  setSearchOpen(false)
-                }}
+                onClick={() => openSearchResult(result)}
               >
                 {result.type === 'Resource' ? (
                   <Table2 size={16} />
-                ) : (
+                ) : result.type === 'Field' ? (
                   <Braces size={16} />
+                ) : (
+                  <ArrowUpRight size={16} />
                 )}
                 <span>
                   <strong>{result.label}</strong>
@@ -1069,13 +1176,14 @@ function Explorer() {
             {!matches.length && (
               <p className="empty-search">
                 {snapshot
-                  ? 'No matching resources or fields.'
-                  : 'Connect to discover searchable schema.'}
+                  ? 'No matches. Try a field, tool, or saved check name.'
+                  : 'No matches. Connect to discover searchable schema, or search for a tool.'}
               </p>
             )}
           </div>
           <div className="search-hint">
-            <kbd>Esc</kbd> to close
+            <kbd>Enter</kbd> opens first result · <kbd>Tab</kbd> moves through
+            results · <kbd>Esc</kbd> closes
           </div>
         </DialogContent>
       </Dialog>

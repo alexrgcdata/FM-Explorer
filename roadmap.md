@@ -1,6 +1,6 @@
 # FM API Explorer — Delivery roadmap
 
-Updated: October 28, 2026
+Updated: October 29, 2026
 
 Product job: help a developer inherit a FileMaker solution, understand its integration-facing structure, and give people or agents a reliable starting package.
 
@@ -15,6 +15,10 @@ The current application is a local workbench with IndexedDB, read-only Data API/
 5. **Choose a hosted backend only when needed.** PostgreSQL is Alex's preference. Verify the exact Namecheap plan's database access and supported application runtime first. The public FTP preview remains separate; no hosted backend or production upload is part of this local work.
 
 Local connection preparation now supports a pasted Data API/OData URL, a credential-free saved profile, and a copyable setup request. A real target and test account are still required for step 2. The public preview does not accept real credentials. Keep working in the current checkout. Rebuild the manual-upload demo with `npm run build:ftp`; its delivery path stays `FTP-READY/dist/`.
+
+## October 29 local release — offline finish pass
+
+Version 0.9.1 adds workspace-wide search for tools, saved checks and actions alongside resources/fields, with keyboard activation and a mobile menu entry. Date/timestamp validation rejects malformed values and appended expressions. TypeScript generation handles reserved names; Postman/OpenAPI reads use canonical encoded paths. The data browser and entity AI context load on demand. `npm run verify:release` repeats the automated suite, both builds, and independent FTP manifest/hash/asset checks. The manual delivery folder stays `FTP-READY/dist/`. Real FileMaker acceptance and hosted deployment remain pending; this release does not contact a real FileMaker host.
 
 ## October 28 local release — workspace portability
 
@@ -60,7 +64,7 @@ Acceptance: the selected generator produces runnable output with clear permissio
 
 Improve installation, update/recovery behavior, performance, documentation, and accessibility. Decide whether a desktop wrapper or team service solves an observed need. Assess distribution/pricing only after pilot evidence; do not create hosting, accounts, billing, telemetry, or paid services prematurely.
 
-## Current implementation boundary
+## Earlier milestone evidence
 
 Step 1 is implemented. Seventeen automated tests pass, including v1-to-v2 IndexedDB migration, request persistence, 200-result retention, deletion cascades, response evaluation, and redacted export defaults. Browser verification covered saving an Active-customer query, a successful check, a deliberately incorrect FullName number expectation producing seven type mismatches, correcting it, running the suite, exporting, and reloading with all three summaries preserved. No console errors were observed in this flow.
 

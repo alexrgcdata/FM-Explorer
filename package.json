@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/alexrgcdata/FM-Explorer.git"
   },
-  "version": "0.9.0",
+  "version": "0.9.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -17,7 +17,8 @@
     "typecheck": "tsc -b",
     "start": "node --import tsx server/index.ts",
     "dev:server": "node --env-file-if-exists=.env --import tsx server/index.ts",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "verify:release": "node scripts/verify-release.mjs"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.3",
