@@ -12,9 +12,16 @@ export type { Condition } from './contracts'
 export type ExportKind =
   'typescript' | 'jsonschema' | 'openapi' | 'postman' | 'markdown' | 'mcp'
 type Context = { profile: Profile; snapshot?: Snapshot; auth?: string }
+const reservedTypeNames = new Set(
+  'await break case catch class const continue debugger default delete do else enum export extends false finally for function if import in instanceof interface let new null package private protected public return static super switch this throw true try typeof var void while with yield any boolean number string symbol unknown never object undefined type namespace module declare abstract implements keyof infer readonly unique'.split(
+    ' ',
+  ),
+)
 function typeName(name: string) {
   const result = name.replace(/[^A-Za-z0-9_$]/g, '_')
-  return /^[A-Za-z_$]/.test(result) ? result : `Resource_${result}`
+  return /^[A-Za-z_$]/.test(result) && !reservedTypeNames.has(result)
+    ? result
+    : `Resource_${result}`
 }
 const commentText = (value: string) =>
   value.replaceAll('*/', '* /').replace(/[\r\n\u2028\u2029]/g, ' ')
@@ -81,15 +88,14 @@ export function generate(
       protocol,
     },
     stamp = context?.snapshot?.inspectedAt ?? 'not recorded'
-  const path =
-    entity.endpoint ??
-    compileRequest(profile, entity, {
-      entity: entity.name,
-      conditions: [],
-      match: 'all',
-      offset: 0,
-      limit: 20,
-    }).path.split('?')[0]
+  const read = compileRequest(profile, entity, {
+    entity: entity.name,
+    conditions: [],
+    match: 'all',
+    offset: 0,
+    limit: 20,
+  })
+  const path = read.path.split('?')[0]
   if (kind === 'typescript')
     return `// ${commentText(entity.name)} — ${protocol}\n// Source: ${commentText(source)}; inspected: ${commentText(stamp)}\n// Numeric strings preserve decimals and large integers. Unknown nullability is permissive.\n\nexport interface ${typeName(entity.name)} {\n${entity.fields.map((f) => `  /** ${commentText(f.description)} */\n  ${JSON.stringify(f.name)}${f.required || f.key ? '' : '?'}: ${tsType(f)};`).join('\n\n')}\n}\n`
   if (kind === 'jsonschema')
@@ -228,7 +234,7 @@ export function generate(
                           },
                         ],
                       },
-              url: `{{host}}${path}?${protocol === 'Data API' ? '_limit' : '$top'}=20`,
+              url: `{{host}}${read.path}`,
             },
           },
         ],

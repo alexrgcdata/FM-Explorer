@@ -9,6 +9,29 @@ export function odataIdentifier(value: string) {
     ? value
     : `"${value.replaceAll('"', '""')}"`
 }
+function validDate(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (!match) return false
+  const [, y, m, d] = match.map(Number),
+    leap = y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  return y >= 1 && m >= 1 && m <= 12 && d >= 1 && d <= days[m - 1]
+}
+function validTimestamp(value: string) {
+  const match =
+    /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(?:Z|[+-](\d{2}):(\d{2}))?$/.exec(
+      value,
+    )
+  return (
+    !!match &&
+    validDate(match[1]) &&
+    Number(match[2]) <= 23 &&
+    Number(match[3]) <= 59 &&
+    Number(match[4] ?? 0) <= 59 &&
+    Number(match[5] ?? 0) <= 23 &&
+    Number(match[6] ?? 0) <= 59
+  )
+}
 function literal(field: Field, value: string) {
   if (field.nativeType === 'Edm.Guid') {
     if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value))
@@ -26,13 +49,15 @@ function literal(field: Field, value: string) {
     return value
   }
   if (field.type === 'date') {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value))
-      throw new Error('Use an ISO date (YYYY-MM-DD).')
+    if (!validDate(value))
+      throw new Error('Use a valid calendar date (YYYY-MM-DD).')
     return value
   }
   if (field.type === 'timestamp') {
-    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value))
-      throw new Error('Use an ISO timestamp.')
+    if (!validTimestamp(value))
+      throw new Error(
+        'Use a complete ISO timestamp without extra text, for example 2026-10-28T14:30:00Z.',
+      )
     return value
   }
   return `'${value.replaceAll("'", "''")}'`
