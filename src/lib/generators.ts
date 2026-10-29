@@ -282,6 +282,7 @@ export function allMarkdown(
     | typeof fixtureRelationships = fixtureRelationships,
   database = 'Northstar_CRM',
   source = 'Inspected workspace schema',
+  inspection?: Pick<Snapshot, 'inspectedAt' | 'complete' | 'warnings'>,
 ) {
   const profile: Profile = {
     id: 'export',
@@ -296,16 +297,16 @@ export function allMarkdown(
     database,
     protocol,
     source,
-    inspectedAt: 'See resource provenance',
+    inspectedAt: inspection?.inspectedAt ?? 'Not recorded',
     entities,
     relationships: relationships.map((r) => ({
       ...r,
       evidence: 'evidence' in r ? String(r.evidence) : 'Declared fixture',
     })),
-    warnings: [],
-    complete: true,
+    warnings: inspection?.warnings ?? [],
+    complete: inspection?.complete ?? false,
   }
-  return `# ${database} — schema context\n\n${entities.map((e) => generate(e, 'markdown', protocol, { profile, snapshot })).join('\n---\n\n')}`
+  return `# ${database} — schema context\n\nInspected: ${snapshot.inspectedAt}\nCoverage: ${snapshot.complete ? 'Completed within account-visible scope' : 'Partial or unknown discovery'}\n${snapshot.warnings.length ? `\n## Discovery notes\n\n${snapshot.warnings.map((w) => `- ${w}`).join('\n')}\n` : ''}\n${entities.map((e) => generate(e, 'markdown', protocol, { profile, snapshot })).join('\n---\n\n')}`
 }
 export function downloadFile(
   name: string,

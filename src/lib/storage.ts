@@ -103,11 +103,35 @@ export async function saveProfile(profile: Profile) {
 export async function getProfiles() {
   return (await database).getAll('profiles')
 }
-export async function saveSnapshot(snapshot: Snapshot, profile?: Profile) {
-  const safe = {
-    ...snapshot,
-    entities: snapshot.entities.map((e) => ({ ...e, rows: [] })),
+function metadataOnly(snapshot: Snapshot): Snapshot {
+  const schema = makeSchemaVersion(snapshot)
+  return {
+    id: schema.id,
+    profileId: schema.profileId,
+    database: schema.database,
+    protocol: schema.protocol,
+    source: schema.source,
+    inspectedAt: schema.inspectedAt,
+    complete: schema.complete,
+    warnings: schema.warnings,
+    entities: schema.entities.map((e, index) => {
+      const count = snapshot.entities[index].count
+      return {
+        ...e,
+        count:
+          count === null ||
+          (typeof count === 'number' &&
+            Number.isSafeInteger(count) &&
+            count >= 0)
+            ? count
+            : undefined,
+      }
+    }),
+    relationships: schema.relationships,
   }
+}
+export async function saveSnapshot(snapshot: Snapshot, profile?: Profile) {
+  const safe = metadataOnly(snapshot)
   const db = await database,
     tx = db.transaction(['snapshots', 'schemaVersions'], 'readwrite')
   await tx.objectStore('snapshots').put(safe)
@@ -139,7 +163,14 @@ export async function clearSnapshots() {
   await tx.done
 }
 export async function getSnapshot(id: string) {
-  return (await database).get('snapshots', id)
+  const db = await database
+  const value = await db.get('snapshots', id)
+  if (!value) return undefined
+  // Also remove raw payloads retained by older releases before showing cached metadata.
+  const safe = metadataOnly(value)
+  if (JSON.stringify(value) !== JSON.stringify(safe))
+    await db.put('snapshots', safe)
+  return safe
 }
 export async function removeProfile(id: string) {
   const db = await database

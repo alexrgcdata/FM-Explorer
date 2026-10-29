@@ -302,7 +302,7 @@ function useWorkspaceState() {
   async function remove(id: string) {
     if (profiles.find((p) => p.id === id)?.lab) return
     await disconnect(id)
-    await persist(storage.removeProfile(id))
+    await storage.removeProfile(id)
     setProfiles((current) => current.filter((p) => p.id !== id))
     setSnapshots((current) => {
       const next = { ...current }

@@ -38,6 +38,7 @@ import {
   Table2,
   Terminal,
   Unplug,
+  Wrench,
 } from 'lucide-react'
 import { Toaster, toast } from 'sonner'
 import type { Page, Profile } from './lib/data'
@@ -80,6 +81,7 @@ import {
 import { SchemaHistoryView } from './components/schema-history-view'
 import { WelcomeDialog } from './components/welcome-dialog'
 import { ScreenGuide } from './components/screen-guide'
+import { AppErrorBoundary } from './components/app-error-boundary'
 import { publicPreview } from './lib/runtime'
 import type { SavedRequest } from './lib/saved-requests'
 import {
@@ -126,6 +128,14 @@ const navLabels: Record<Page, string> = {
   'entity-overview': 'Entity overview',
   api: 'API',
 }
+const primaryPages: Page[] = [
+  'overview',
+  'schema',
+  'records',
+  'relationships',
+  'history',
+]
+const toolPages: Page[] = ['query', 'requests', 'developer', 'handoff', 'ai']
 const descriptions: Record<Page, string> = {
   'entity-overview': 'Understand this entity.',
   api: 'Read access and integration expectations.',
@@ -143,9 +153,11 @@ const descriptions: Record<Page, string> = {
 export default function App() {
   return (
     <TooltipProvider delayDuration={300}>
-      <WorkspaceProvider>
-        <Explorer />
-      </WorkspaceProvider>
+      <AppErrorBoundary>
+        <WorkspaceProvider>
+          <Explorer />
+        </WorkspaceProvider>
+      </AppErrorBoundary>
     </TooltipProvider>
   )
 }
@@ -434,7 +446,7 @@ function Explorer() {
             }}
           >
             <Menu size={18} />
-            Resources
+            <span>Resources</span>
           </button>
           <nav
             className="workspace-tabs"
@@ -442,8 +454,10 @@ function Explorer() {
             ref={navRef}
           >
             {navigation
-              .filter(
-                (item) => item.id !== 'entity-overview' && item.id !== 'api',
+              .filter((item) => primaryPages.includes(item.id))
+              .sort(
+                (a, b) =>
+                  primaryPages.indexOf(a.id) - primaryPages.indexOf(b.id),
               )
               .map((item) => (
                 <button
@@ -469,6 +483,55 @@ function Explorer() {
                 </button>
               ))}
           </nav>
+          <div className="workspace-tools-slot">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={
+                    toolPages.includes(page)
+                      ? 'active workspace-tools-trigger'
+                      : 'workspace-tools-trigger'
+                  }
+                  aria-label="Developer tools menu"
+                  aria-current={toolPages.includes(page) ? 'page' : undefined}
+                >
+                  <Wrench size={17} />
+                  <span>Tools</span>
+                  <ChevronDown size={13} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="workspace-tools-menu">
+                <DropdownMenuLabel>Build, check & hand off</DropdownMenuLabel>
+                {navigation
+                  .filter((item) => toolPages.includes(item.id))
+                  .map((item) => (
+                    <DropdownMenuItem
+                      key={item.id}
+                      onSelect={() => navigate(item.id)}
+                    >
+                      <item.icon size={16} />
+                      <span>{navLabels[item.id]}</span>
+                      {page === item.id && (
+                        <Check size={14} className="ml-auto" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                <DropdownMenuSeparator className="compact-workspace-action" />
+                <DropdownMenuItem
+                  className="compact-workspace-action"
+                  onSelect={() => setSettingsOpen(true)}
+                >
+                  <Settings2 size={16} /> Workspace settings & backup
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="compact-workspace-action"
+                  onSelect={() => setHelpOpen(true)}
+                >
+                  <CircleHelp size={16} /> Help & quick start
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
       <div
@@ -695,6 +758,8 @@ function Explorer() {
                             entities,
                             relationships,
                             profile.database,
+                            snapshot?.source,
+                            snapshot,
                           ),
                           'text/markdown',
                         )
@@ -951,7 +1016,7 @@ function Explorer() {
                     : snapshot
                       ? 'Saved schema'
                       : 'Ready to connect'}
-                <span className="footer-dot">·</span>v0.8.0
+                <span className="footer-dot">·</span>v0.9.0
               </span>
             </footer>
           </main>

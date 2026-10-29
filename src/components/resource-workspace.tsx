@@ -26,11 +26,7 @@ export const isEntityPage = (page: Page) =>
     'ai',
   ].includes(page)
 const tabFor = (page: Page) =>
-  page === 'records'
-    ? 'schema'
-    : page === 'query' || page === 'developer'
-      ? 'api'
-      : page
+  page === 'query' || page === 'developer' ? 'api' : page
 export function ResourceWorkspace({
   page,
   entity,
@@ -143,8 +139,9 @@ export function ResourceWorkspace({
         <TabsList aria-label="Entity views" variant="line">
           <TabsTrigger value="entity-overview">Overview</TabsTrigger>
           <TabsTrigger value="schema" onClick={() => onNavigate('schema')}>
-            Schema
+            Fields
           </TabsTrigger>
+          <TabsTrigger value="records">Records</TabsTrigger>
           <TabsTrigger value="relationships">Relationships</TabsTrigger>
           <TabsTrigger value="api" onClick={() => onNavigate('api')}>
             API

@@ -91,6 +91,7 @@ export function GenerateView({
           relationships,
           profile.database,
           snapshot?.source,
+          snapshot,
         )
       : generate(entity, kind, protocol, {
           profile,
@@ -133,7 +134,7 @@ export function GenerateView({
             <div>
               <BookOpen size={16} />
               <span>
-                <strong>Include the full solution</strong>
+                <strong>Include all inspected resources</strong>
                 <small>
                   All resources, fields, and available relationship evidence
                 </small>
@@ -141,7 +142,7 @@ export function GenerateView({
             </div>
             <Switch
               id="all-schema"
-              aria-label="Include the full solution"
+              aria-label="Include all inspected resources"
               checked={all}
               onCheckedChange={setAll}
             />

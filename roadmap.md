@@ -18,6 +18,8 @@ Local connection preparation now supports a pasted Data API/OData URL, a credent
 
 ## October 28 local release — workspace portability
 
+The v0.9 follow-up reduces top-level navigation to exploration plus a Tools menu, separates entity Fields/Records tabs, adds application-screen recovery, and confirms connection deletion. Raw API payloads are removed from cached schemas, including older entries when read. Full-schema documentation carries inspection time and partial-discovery warnings. FTP packaging keeps the output folder in place when it is open in Windows, preserves a recovery copy, verifies copied assets, writes the entry point last and prunes obsolete generated files. See README release readiness for the remaining real-server and deployed-host acceptance gates.
+
 Version 0.8 adds Settings → Save & restore workspace. A reviewed JSON file carries one connection's schema history, saved check definitions and developer notes between browsers. Schema/definition validation, lab-only website imports, fresh identifiers and a single transaction protect existing work. Login fields, sessions, returned records, raw responses and run history are excluded. Filter values and developer text remain private content and require acknowledgement before download. This preserves Explorer work, not a FileMaker database backup.
 
 Clearing schemas now requires a separate confirmation explaining that it applies to every connection; users can save the current workspace first. FTP packaging now stages and hash-verifies a fresh `FTP-READY/dist/`, writes local build instructions and retains the preceding package under `.local/`. No website upload or hosted-backend change is included. Real FileMaker trials remain the next external milestone.

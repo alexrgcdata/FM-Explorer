@@ -114,7 +114,13 @@ export function WorkspaceDashboard({
                 <span className="dashboard-step-number">{index + 1}</span>
                 <span>
                   <strong>{item.title}</strong>
-                  <small>{item.detail}</small>
+                  <small>
+                    {item.page === 'records' && session
+                      ? publicPreview
+                        ? 'Search and inspect the sample records.'
+                        : 'Search and inspect a page of records.'
+                      : item.detail}
+                  </small>
                 </span>
                 <ArrowRight size={16} />
               </button>

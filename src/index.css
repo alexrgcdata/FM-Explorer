@@ -7092,3 +7092,55 @@ body {
   margin-top: 4px;
   color: var(--primary);
 }
+
+/* Keep exploration visible; collect occasional tools in one compact menu. */
+.workspace-tools-slot {
+  flex-shrink: 0;
+}
+.workspace-tools-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 13px 14px;
+  border-left: 1px solid var(--border);
+  border-bottom: 3px solid transparent;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+}
+.workspace-tools-trigger.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.workspace-tools-trigger:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+@media (max-width: 600px) {
+  .resource-drawer-toggle > span {
+    display: none;
+  }
+}
+.workspace-tools-menu {
+  min-width: 245px;
+}
+.compact-workspace-action {
+  display: none;
+}
+@media (max-width: 900px) {
+  .compact-workspace-action {
+    display: flex;
+  }
+}
+.workspace-tools-menu [role='menuitem'] {
+  min-height: 42px;
+  gap: 12px;
+  font-size: 0.9375rem;
+}
+.entity-reading-tabs [role='tablist'] {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.entity-reading-tabs [role='tab'] {
+  flex-shrink: 0;
+}

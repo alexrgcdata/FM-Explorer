@@ -10,9 +10,52 @@
       content="A clearer view into your FileMaker solution. Explore schema, browse records, and build API requests."
     />
     <title>FM API Explorer</title>
+    <style>
+      html {
+        background: #0d0e12;
+      }
+      #boot-fallback {
+        max-width: 540px;
+        margin: 12vh auto;
+        padding: 28px;
+        color: #f8f7fc;
+        font:
+          16px/1.7 system-ui,
+          sans-serif;
+      }
+      #boot-fallback h1 {
+        font-size: 24px;
+        line-height: 1.3;
+      }
+      #boot-fallback p {
+        color: #b8b2c8;
+      }
+      #boot-fallback .boot-help {
+        font-size: 15px;
+        opacity: 0;
+        animation: boot-help 0s 6s forwards;
+      }
+      @keyframes boot-help {
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main id="boot-fallback" role="status">
+        <h1>FM API Explorer</h1>
+        <p>Opening your workspace…</p>
+        <p class="boot-help">
+          If this message remains, refresh the page. If you uploaded this site,
+          check that index.html and the complete assets folder are together.
+        </p>
+        <noscript
+          >Enable JavaScript to open the interactive workspace.</noscript
+        >
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -3,7 +3,7 @@ import {
   mkdir,
   readFile,
   readdir,
-  rename,
+  unlink,
   lstat,
   writeFile,
 } from 'node:fs/promises'
@@ -71,20 +71,55 @@ for (const file of list) {
   hashes.push({ file: file.split(path.sep).join('/'), sha256: original })
 }
 await mkdir(release, { recursive: true })
-let previous
+let oldFiles = []
 if (
   await lstat(destination).catch((e) => {
     if (e.code !== 'ENOENT') throw e
   })
 ) {
-  previous = path.join(root, '.local', `ftp-previous-${stamp}`)
-  await rename(destination, previous)
+  oldFiles = await files(destination)
+  const extra = (await readdir(destination)).filter(
+    (name) => !allowed.includes(name),
+  )
+  if (extra.length)
+    throw new Error(
+      'The FTP output contains unexpected top-level files. Keep personal files outside FTP-READY/dist before rebuilding.',
+    )
+  const previous = path.join(root, '.local', `ftp-previous-${stamp}`)
+  await cp(destination, previous, {
+    recursive: true,
+    errorOnExist: true,
+    force: false,
+  })
 }
-try {
-  await rename(stage, destination)
-} catch (error) {
-  if (previous) await rename(previous, destination)
-  throw error
+await mkdir(destination, { recursive: true })
+// Keep this folder stable while Explorer or an FTP client has it open.
+// Copy and verify all runtime assets first, then replace the entry point last.
+for (const file of [
+  ...list.filter((name) => name !== 'index.html'),
+  'index.html',
+]) {
+  const target = path.resolve(destination, file)
+  if (!target.toLowerCase().startsWith((destination + path.sep).toLowerCase()))
+    throw new Error('Invalid FTP output path.')
+  await mkdir(path.dirname(target), { recursive: true })
+  await cp(path.join(stage, file), target, { force: true })
+  const digest = createHash('sha256')
+    .update(await readFile(target))
+    .digest('hex')
+  if (
+    digest !==
+    hashes.find((item) => item.file === file.split(path.sep).join('/'))?.sha256
+  )
+    throw new Error(`FTP output verification failed: ${file}`)
+}
+// Only obsolete generated files inside this verified output directory are removed;
+// the preceding package is already copied into the local recovery folder.
+for (const file of oldFiles.filter((name) => !list.includes(name))) {
+  const target = path.resolve(destination, file)
+  if (!target.toLowerCase().startsWith((destination + path.sep).toLowerCase()))
+    throw new Error('Invalid obsolete asset path.')
+  await unlink(target)
 }
 await writeFile(
   path.join(release, 'READ-ME-FIRST.txt'),

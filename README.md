@@ -16,6 +16,24 @@ For example, a website expects an Email field. After a solution update, compare 
 
 The current release is an early local workbench validated against synthetic OData/Data API labs. Real FileMaker Server/Cloud acceptance is pending. Schema history documents changes and cannot restore a database. A handoff package provides context and read scaffolding; it does not establish that an agent understands every business rule.
 
+## Release readiness — v0.9.0
+
+**Ready for a public synthetic demo; not yet validated for production FileMaker integrations.** Automated checks and local browser trials cover the shipped build and protocol fixtures; actual Server/Cloud acceptance remains pending.
+
+| Area | Status | Remaining acceptance |
+| --- | --- | --- |
+| FTP website demo | Built and locally verified under `/projects/explorer/` | After manual upload, verify HTTPS, assets/fonts, refresh, downloads and browser storage on the actual host. |
+| Local read-only workbench | Synthetic Data API/OData protocol tests pass | Approved real endpoint/account and version-specific testing. |
+| Schema/history/checks/exports | Local tests and browser workflows verified | Check a real integration, permission-limited discovery, and independently usable handoff. |
+| Workspace privacy | Authentication fields and returned records excluded; raw cached payloads stripped | Schema names, notes and saved filter values remain sensitive; users review exports. |
+| Hosted live connector | Not provided by the FTP build | Review hosting/runtime/security before accepting real credentials on a public website. |
+
+Before calling live integrations production-ready, record actual FileMaker versions and test each API you intend to advertise: login/token ownership and expiry, insufficient privileges, empty results, paging beyond one page, filtering/sorting, large numbers/date/time fields, exposed navigation, reconnect/logout, and representative integration checks. Review layout/server-trigger behavior with the owner before reads. Enter credentials locally, never in issues or chat. Run a pilot with another developer and verify their exported handoff works without hidden chat history.
+
+Navigation keeps Dashboard, Schema, Records, Relationships and History visible; **Tools** groups queries, saved checks, developer exports, handoff packages and AI context. Entity tabs keep **Fields** and **Records** distinct. Failed lazy-loaded screens offer a reload action without clearing the workspace. Connection removal requires confirmation and reports persistence errors.
+
+The dependency audit on October 28, 2026 reported no known advisories in the installed dependency tree. This is a package-registry check, not a security certification. Browser QA uses Chromium; physical Safari/iOS testing and deployed-host acceptance remain pending. A large initial-bundle build advisory remains a performance follow-up.
+
 ## Start
 
 ### Website preview by FTP
