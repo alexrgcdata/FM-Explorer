@@ -1,10 +1,43 @@
 # FM API Explorer
 
-React/TypeScript developer workbench with neutral dark surfaces and orange accents, shadcn/Tailwind, an IndexedDB workspace, and a local Node service for FileMaker API requests.
+A read-only developer workbench for exploring FileMaker's API-visible schema, checking integration expectations, and exporting a documented handoff. Built with React, TypeScript, Vite, shadcn/Tailwind, IndexedDB, and a local Node/Fastify service.
 
 **Created and maintained by Alex Seidler** · [alex@rgcdata.com](mailto:alex@rgcdata.com) · [GitHub](https://github.com/alexrgcdata)
 
 FM API Explorer helps FileMaker developers, web developers, and AI/MCP builders understand the API-facing structure of a solution, explore records, test integration expectations, and generate useful documentation and code artifacts.
+
+## Review the project in five minutes
+
+No FileMaker installation, account, API key, or uploaded database file is needed to try the synthetic lab. Install Node.js 24 or newer with npm, then run:
+
+```powershell
+git clone https://github.com/alexrgcdata/FM-Explorer.git
+cd FM-Explorer
+npm ci
+npm run build
+npm start
+```
+
+Open [http://127.0.0.1:4186/](http://127.0.0.1:4186/) and keep the terminal running. Select **Local FileMaker Lab**, connect/discover, then:
+
+1. Open **Schema** and select Customers to inspect field definitions and their known/unknown properties.
+2. Switch to **Records** to inspect a bounded page; filter or sort it.
+3. Open **Tools → Queries**, build a read, and save its response expectations under **Saved checks**.
+4. Use **History** to compare inspected schemas. The lab's change example illustrates a difference without altering a database.
+5. Open **Tools → Handoff** to preview schema, types, read examples, and developer notes before exporting.
+
+The lab simulates protocol responses; it does not establish real FileMaker compatibility. [READINESS.md](READINESS.md) records verification evidence and remaining acceptance work.
+
+## How it fits together
+
+| Part | Responsibility |
+| --- | --- |
+| React/TypeScript UI | Entity navigation, TanStack record tables, React Flow relationship graph, query builder, generated documents and optional newcomer guidance. |
+| IndexedDB workspace | Nonsecret connection profiles, metadata-only schema history, saved checks and developer knowledge; no persisted authentication or returned records. |
+| Local Node/Fastify service | Loopback-only API boundary, session/auth handling, input guards and bounded read requests through Data API/OData adapters. Credentials remain in service memory. |
+| Browser-only website build | Synthetic fixtures evaluated in the browser. No local service or real database authentication; separate IndexedDB namespace. |
+
+Engineering decisions include preserving unsafe numeric values as strings, distinguishing unknown metadata from confirmed changes, restricting continuation URLs to the expected origin/resource, and requiring filter-value review before exporting integration requests. Tests exercise these boundaries rather than claiming a full FileMaker server is reproduced. Start with [server/adapters.ts](server/adapters.ts), [src/lib/schema-history.ts](src/lib/schema-history.ts), and [tests/](tests/).
 
 ## Why use it?
 
@@ -16,7 +49,7 @@ For example, a website expects an Email field. After a solution update, compare 
 
 The current release is an early local workbench validated against synthetic OData/Data API labs. Real FileMaker Server/Cloud acceptance is pending. Schema history documents changes and cannot restore a database. A handoff package provides context and read scaffolding; it does not establish that an agent understands every business rule.
 
-## Release readiness — v0.9.0
+## Release readiness — v0.9.1
 
 **Ready for a public synthetic demo; not yet validated for production FileMaker integrations.** Automated checks and local browser trials cover the shipped build and protocol fixtures; actual Server/Cloud acceptance remains pending.
 
@@ -73,9 +106,9 @@ The lab is a protocol simulator containing six resources, 42 fields, five declar
 
 ## Saved requests and response checks
 
-See [roadmap.md](roadmap.md) for the delivery sequence. Step 1 is available under **Saved requests**. In **Query builder**, set your filters, click **Save request**, and choose the fields/types/null rules, minimum returned rows, and optional upstream response-time limit your integration expects. Save up to 100 requests per connection; run one or run the suite sequentially. A request error stops the suite. Cancel stops waiting for further reads.
+See [roadmap.md](roadmap.md) for the delivery sequence. Step 1 is available under **Tools → Saved checks**. In **Tools → Queries**, set your filters, click **Save request**, and choose the fields/types/null rules, minimum returned rows, and optional upstream response-time limit your integration expects. Save up to 100 requests per connection; run one or run the suite sequentially. A request error stops the suite. Cancel stops waiting for further reads.
 
-Definitions and the latest 200 result summaries across connections persist in IndexedDB v2. Edits increment the definition revision and require a new run. Earlier results remain in history. No returned row values or authentication are stored in the check summaries. Saved query filter values are stored locally and may contain private data.
+Definitions and the latest 200 result summaries across connections persist in IndexedDB (current database version 4; these stores were introduced in version 2). Edits increment the definition revision and require a new run. Earlier results remain in history. No returned row values or authentication are stored in the check summaries. Saved query filter values are stored locally and may contain private data.
 
 Export creates versioned JSON request definitions and summaries, with filter values redacted by default and `requiresFilterValues` marking definitions needing those values again. Standalone request-definition exports are not imported or automatically executed. To transfer saved checks with their original values, use the separate workspace transfer below. Empty results make selected field checks inconclusive; a minimum-row failure still fails. Checks cover the returned page, not every record or a FileMaker backup.
 
@@ -132,7 +165,7 @@ IndexedDB database: `fm-api-explorer`, version 4.
 | Store | Contents |
 | --- | --- |
 | profiles | Nonsecret name, host, database, protocol, version |
-| snapshots | Inspected schema, raw metadata, source/time, qualified counts, warnings; no record rows |
+| snapshots | Allowlisted structural metadata, source/time, qualified counts and warnings; no raw response payloads or record rows |
 | schemaVersions | Up to 50 dated structural inspections per connection; no rows, raw payloads, or record counts |
 | knowledgeNotes | Up to 200 developer-authored notes per connection, marked draft or human-confirmed |
 | preferences | Active connection, favorites, compact rows, reduced motion |
@@ -192,7 +225,7 @@ npm run build
 npm run build:ftp
 ```
 
-Tests exercise both local protocol flows, session ownership, guards, empty finds, native errors, continuation pagination, schema parsing, precision, query escaping, and IndexedDB's exclusion of credentials/record rows. Browser checks use local synthetic data; they do not establish real FileMaker or physical iOS/Safari compatibility.
+On October 30, 2026, all **51 automated tests**, `npm run typecheck`, and `npm run build` passed for the v0.9.1 application source. Tests use local injected protocol fixtures, a browser-simulation adapter, temporary files and fake IndexedDB; they do not call a real FileMaker endpoint. Coverage includes session ownership, guards, empty finds, native errors, continuation pagination, schema parsing/comparison, numeric precision, date/query validation, generated TypeScript compilation, handoff redaction/hashes, workspace transfer rollback and storage exclusion of authentication/record rows. This is behavioral coverage, not a measured coverage percentage. Browser checks recorded in earlier release work use synthetic data and do not establish real FileMaker or physical iOS/Safari compatibility.
 
 ## Source
 
@@ -219,11 +252,15 @@ Contact: [alex@rgcdata.com](mailto:alex@rgcdata.com)
 
 Copyright © 2026 Alex Seidler.
 
+## License status
+
+This repository currently has no project license file. Public visibility allows source review; do not assume an open-source license has been granted. Third-party dependencies retain their own licenses; the website build includes `THIRD-PARTY-NOTICES.txt`. No license is added or changed by this documentation pass.
+
 ## Workspace navigation and welcome
 
-The selected entity is the main object: its name, observed or developer-confirmed description, and factual counts lead the page. Grouped information and compact table spacing restore the fuller workbench layout. Five persistent tabs organize **Overview, Schema, Relationships, API, and AI**. Overview brings together declared keys, reported counts, exposed connections, saved integration checks, and developer knowledge. Unknown business meaning stays explicit; the app does not infer API usage or workflow rules from field names.
+The selected entity is the main object: its name, observed or developer-confirmed description, and factual counts lead the page. Grouped information and compact table spacing organize the workbench. Six persistent entity tabs organize **Overview, Fields, Records, Relationships, API, and AI**. Overview brings together declared keys, reported counts, exposed connections, saved integration checks, and developer knowledge. Unknown business meaning stays explicit; the app does not infer API usage or workflow rules from field names.
 
-The app starts on **Dashboard**, with the database name, connection state, three schema totals, three suggested steps (fields and types, records, relationships), and a clickable preview of exposed relationships. The highlighted Start here card makes the first step explicit; a collapsed Coming from MySQL? note maps fields and records to familiar terms and explains API-visible layouts/entity sets. The resource list stays in the collapsible rail instead of repeating on the dashboard. The two-row top bar places search beside the linked-bracket logo, with a compact, labeled **Connection** menu on the right and direct work-area links below. The Connection menu contains saved profiles, Manage connections, and New connection. Active navigation is highlighted; entity pages keep the selected resource as their prominent heading. The narrow resource list can collapse and becomes a drawer on smaller screens. Field details open on demand; records remain under Schema, and queries and generated types remain under API. Clicking Schema or API returns directly from these subviews. Metadata and context previews stay collapsed until requested.
+The app starts on **Dashboard**, with the database name, connection state, three schema totals, three suggested steps (fields and types, records, relationships), and a clickable preview of exposed relationships. The highlighted Start here card makes the first step explicit; a collapsed Coming from MySQL? note maps fields and records to familiar terms and explains API-visible layouts/entity sets. The resource list stays in the collapsible rail instead of repeating on the dashboard. The two-row top bar places search beside the linked-bracket logo, with a compact, labeled **Connection** menu on the right and direct work-area links below. The Connection menu contains saved profiles, Manage connections, and New connection. Active navigation is highlighted; entity pages keep the selected resource as their prominent heading. The narrow resource list can collapse and becomes a drawer on smaller screens. Field details open on demand. Fields and Records have separate entity tabs; queries and generated types sit under API. The entity tabs stay available when switching between these views. Metadata and context previews stay collapsed until requested.
 
 A dismissible welcome screen credits **Alex Seidler / RGC Data Solutions**, linking to [rgcdata.com](https://rgcdata.com/) for custom FileMaker ↔ web ↔ mobile integrations, hosting, and complex development projects. Its optional five-step guide links to the relevant screens. X, Escape, or Explore workspace closes it. **Don't show this on startup** is saved locally in IndexedDB. **Help & shortcuts → Welcome & quick start** reopens it. The guide does not connect, execute a query, or open the external site automatically.
 
