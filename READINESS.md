@@ -1,6 +1,6 @@
 # FM API Explorer readiness
 
-Reviewed October 30, 2026. Created and maintained by **Alex Seidler** ([alex@rgcdata.com](mailto:alex@rgcdata.com)).
+Reviewed October 30, 2026. Created and maintained by **Alex Seidler** ([hello@alexseidler.dev](mailto:hello@alexseidler.dev)).
 
 **Status:** suitable for a synthetic product demonstration and developer source review. Real FileMaker integration acceptance remains pending. No hosted live connector is supplied by the website build.
 
