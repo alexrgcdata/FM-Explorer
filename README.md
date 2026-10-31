@@ -55,6 +55,7 @@ Enter real credentials locally, never in chat or issues. They stay in local-serv
 
 - [Operating guide](docs/operating-guide.md): installation, real connection setup, storage, saved checks, schema history, exports and privacy details.
 - [Readiness](READINESS.md): assessed source commit, verification evidence and remaining acceptance.
+- [Agent handoff](agentic_handoff.md): current checkpoints, prior verification and next steps for continuing work.
 - [Roadmap](roadmap.md): possible future additions and their acceptance criteria.
 
 Run `npm test`, `npm run typecheck`, and `npm run build` for the local checks. `npm run verify:release` also builds the browser demo and verifies its FTP manifest and assets. It creates local files and does not deploy anything.
